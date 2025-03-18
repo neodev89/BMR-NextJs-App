@@ -1,12 +1,18 @@
-input[type="submit"]
+input[type="submit"], .gender
+    position: relative
+    display: flex
+    flex-direction: row
+    justify-content: center
+    align-items: center
     width: 100px
     height: 40px
-    border: 1px solid blue 
+    border: 1px solid rgb(1, 19, 73)
     border-radius: 10px
-    background-color: lightgrey
+    background-color: rgb(3, 112, 255)
+    color: white
 
 input[type="submit"]:hover
-    background-color: grey 
+    background-color: grey
     color: white
 
 input[type="text"]
@@ -15,6 +21,15 @@ input[type="text"]
     max-width: 300px
     border: 1px solid black
     color: black
+
+.gender
+    text-align: center
+    height: 40px
+    width: 100px
+
+:is(input[type="submit"], .gender):hover
+    background-color: rgb(1, 19, 73)
+    border: 5px double rgb(3, 112, 255)
 
 fieldset, form
     height: 100%
