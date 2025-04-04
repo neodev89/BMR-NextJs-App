@@ -1,13 +1,15 @@
 {
+  "data": {
+    "method": "",
     "BMR": [
-        {
-            "name": "Height", "value": ""
-        },
-        {
-            "name": "Weight", "value": ""
-        },
-        {
-            "name": "Age", "value": ""
-        }
+      {
+        "id": "0",
+        "utente": "user1",
+        "password": "1111",
+        "weight": "",
+        "height": "",
+        "age": ""
+      }
     ]
+  }
 }

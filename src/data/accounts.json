@@ -1,0 +1,30 @@
+{
+    "data": [
+        {
+            "id": "0",
+            "user": "Mattiagiorgio Covato",
+            "birth": "14/08/1989",
+            "bmr": [
+                {
+                    "dateBmr": "01/01/2022",
+                    "weight": "94",
+                    "height": "184",
+                    "age": "35"
+                }
+            ]
+        },
+        {
+            "id": "1",
+            "user": "Guendalino Caio",
+            "birth": "10/01/1990",
+            "bmr": [
+                {
+                    "dateBmr": "01/01/2022",
+                    "weight": "75",
+                    "height": "180",
+                    "age": "37"
+                }
+            ]
+        }
+    ]
+}

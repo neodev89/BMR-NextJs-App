@@ -1,3 +1,4 @@
+@use '../../var-sass/variables'
 .principal
     position: relative
     display: flex
@@ -6,17 +7,23 @@
     height: 90%
     min-width: 350px
     max-width: 40%
-    border: 2px solid blue
+    border: 8px double rgb(47, 78, 255)
+    border-radius: 2.5rem 0.8rem
+    box-shadow: variables.$shadow-black
     padding: 4px
+
+.principal:nth-child(2)
+    border-radius: 0.8rem 2.5rem
 
 .second
     position: relative
     display: flex
     justify-content: center
-    height: 90%
+    height: 95%
     width: 95%
-    border: 2px solid orange 
-
+    border: 2px solid orange
+    border-radius: 2rem
+    padding: 0.4rem
 
 @media screen and (min-width: 364px) and (max-width: 500px)
     .principal

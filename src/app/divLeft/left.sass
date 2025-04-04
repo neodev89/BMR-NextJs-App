@@ -1,4 +1,4 @@
-input[type="submit"], .gender
+input[type="submit"]
     position: relative
     display: flex
     flex-direction: row
@@ -21,15 +21,34 @@ input[type="text"]
     max-width: 300px
     border: 1px solid black
     color: black
+    margin: 0.2rem 0
+    padding: 0 0.2rem
 
-.gender
+.male
     text-align: center
     height: 40px
     width: 100px
+    border: 1px solid rgb(1, 19, 73)
+    border-radius: 10px
+    background-color: rgb(3, 112, 255)
+    color: white
 
-:is(input[type="submit"], .gender):hover
+.female
+    text-align: center
+    height: 40px
+    width: 100px
+    border: 1px solid rgb(145, 0, 145)
+    border-radius: 10px
+    background-color: rgb(251, 88, 248)
+    color: white
+
+:is(.male, input[type="submit"]):hover
     background-color: rgb(1, 19, 73)
     border: 5px double rgb(3, 112, 255)
+
+:is(.female):hover
+    background-color: rgb(145, 0, 145)
+    border: 5px double rgb(251, 88, 248)
 
 fieldset, form
     height: 100%
@@ -60,3 +79,23 @@ fieldset
 
 .tooltiptext:hover
     visibility: visible
+
+.div-field
+    position: relative
+    display: flex
+    flex-direction: column
+    align-items: center
+    height: 80%
+    width: 100%
+    padding: 0 0.1rem
+    margin: 0
+    background-color: aqua
+
+.fieldset
+    position: relative
+    display: flex
+    flex-direction: row
+    align-items: center
+    justify-content: center
+    min-height: 10rem
+    max-height: 30%
