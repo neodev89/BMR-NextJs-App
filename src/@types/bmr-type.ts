@@ -10,7 +10,7 @@ type dataProps = {
 type ObjProps = {
   id: string | React.SetStateAction<number>;
   utente: string;
-  password?: string;
+  password: string;
   weight: string;
   height: string;
   age: string;

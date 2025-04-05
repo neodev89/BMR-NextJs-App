@@ -18,7 +18,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [user, setUser] = useState<userAuthProps[]>([]);
   const [isAuth, setIsAuth] = useState<boolean>(false);
-  const [stateInputs, setStateInputs] = useState<{ [name: string]: string }>({
+  const [stateInputs, setStateInputs] = useState<{
+    email: string;
+    password: string;
+  }>({
     email: "",
     password: ""
   });
@@ -37,29 +40,44 @@ export default function Home() {
       e: React.ChangeEvent<HTMLInputElement>,
     ) => {
       const { name, value } = e.target;
-      if (value.length >= 6 && value.length <= 16) {
+      if (value.length >= 6 && value.length <= 30) {
         setIsOkLength(`Il valore di ${name} è corretto`);
       } else {
         setIsOkLength(`il valore di ${name} è corto o troppo lungo`)
       }
     }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSignIn(event: FormEvent<HTMLInputElement>) {
     event.preventDefault();
 
-    const formData = new FormData();
-    const email = formData.get('email');
-    const password = formData.get('password');
-
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch('/api/auth/save-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ stateInputs  }),
     });
 
     if (!response.ok) {
       setIsAuth(false);
       console.error("Autenticazione fallita!");
+    } else {
+      setIsAuth(true);
+    }
+  }
+
+  async function handleSignUp(event: FormEvent<HTMLInputElement>) {
+    event.preventDefault();
+
+    const isState = stateInputs ?? { email: "", password: "" }
+
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({  isState })
+    });
+
+    if (!response.ok) {
+      setIsAuth(false);
+      console.log("Autenticazione fallita");
     } else {
       setIsAuth(true);
     }
@@ -91,7 +109,7 @@ export default function Home() {
               <div className="contenitore">
                 <div className="login">
                   <p>{isOkLength}</p>
-                  <form action="/save-auth" method="POST" className="save-auth" onSubmit={handleSubmit}>
+                  <form action="/api/auth/save-auth" method="POST" className="save-auth">
                     <fieldset className="fieldset-form">
                       <CustomInput
                         type="email"
@@ -112,7 +130,10 @@ export default function Home() {
                         className="login-input"
                       />
                     </fieldset>
-                    <input type="submit" value="Invia"/>
+                    <div className="enter-user">
+                      <input type="submit" value="Sign in" onSubmit={handleSignIn}/>
+                      <input type="submit" value="Sign up" onSubmit={handleSignUp} />
+                    </div>
                   </form>
                 </div>
               </div>

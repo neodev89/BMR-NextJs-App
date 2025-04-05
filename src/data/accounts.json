@@ -2,7 +2,8 @@
     "data": [
         {
             "id": "0",
-            "user": "Mattiagiorgio Covato",
+            "utente": "utente1@bula.balu",
+            "password": "00001111",
             "birth": "14/08/1989",
             "bmr": [
                 {
@@ -15,7 +16,8 @@
         },
         {
             "id": "1",
-            "user": "Guendalino Caio",
+            "utente": "utente2@balu.bula",
+            "password": "11112222",
             "birth": "10/01/1990",
             "bmr": [
                 {
