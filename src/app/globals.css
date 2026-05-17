@@ -1,0 +1,315 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Scrollbar sottile e discreta */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+@theme {
+  /* Navbar */
+  --height-nv-xs: 5rem;
+  --height-nv-md: 10rem;
+  --padding-nv-xs: 0.5rem;
+  --padding-nv-md: 0.7rem;
+  
+  /* Children */
+  --height-body: 40rem;
+  --height-container-form: 25rem;
+  
+  /* Footer */
+  --height-foot-xs: 15rem;
+  --height-foot-md: 9rem;
+
+  /* Others */
+  --border-white: white;
+  --text-font-xs: 0.875rem;
+  --text-font-sm: 0.95rem;
+  --text-font-md: 1rem;
+  --text-font: 1.4rem;
+
+  --text-h1-xs: 2rem;
+  --text-h1-md: 2.5rem;
+  --text-h1-lg: 4rem;
+  
+  --padding-links: 0.8rem;
+
+  /* Cards */
+  --height-cards-lg: 38rem;
+  --width-cards-lg: 20rem;
+  --height-cards-md: 32rem;
+  --width-cards-md: 22rem;
+  --height-cards-xs: 30rem;
+
+  --_force-rebuild: 1;
+
+}
+
+@utility navbar {
+  @apply relative
+  flex
+  flex-row
+  border-b border-(--border-white);
+  
+  @media (min-width: 320px) {
+    @apply h-(--height-nv-xs)
+    w-full p-nv-xs;
+  }
+
+  @media (min-width: 768px) {
+    @apply h-(--height-nv-md)
+    w-full p-nv-md;
+  }
+}
+
+@utility navbar-link {
+  @media (min-width: 320px) {
+    @apply relative
+    flex flex-col
+    h-full w-80;
+  }
+
+  @media (min-width: 768px) {
+    @apply relative
+    flex flex-row flex-1
+    h-full w-full;
+  }
+}
+
+@utility logo {
+  @apply relative
+  flex flex-row flex-2/12
+  border border-red-300;
+}
+
+@utility link-menu {
+  @media (min-width: 320px) {
+    @apply relative
+    flex flex-col flex-8/12
+    items-center
+    gap-5
+    p-5
+    border border-blue-300;
+  }
+  @media (min-width: 768px) {
+    @apply relative
+    flex flex-row flex-8/12
+    border border-blue-300;
+  }
+}
+
+@utility user {
+  @apply relative
+  flex flex-row flex-2/12
+  border border-orange-300;
+}
+
+@utility children {
+  @apply relative
+  flex flex-row
+  h-auto min-h-full w-full
+  bg-black border-2 border-red-500;
+}
+
+@utility footer {
+  @apply relative
+  flex flex-row
+  h-40 w-full
+  bg-black
+  border-t border-white;
+}
+
+@utility title {
+  @media (min-width: 320px) {
+    @apply text-h1-xs;
+  }
+  @media (min-width: 768px) {
+    @apply text-h1-md;
+  }
+  @media (min-width: 1024px) {
+    @apply text-h1-lg;
+  }
+}
+
+@utility paragraph {
+  @media (min-width: 320px) {
+    @apply text-font-xs;
+  }
+  @media (min-width: 375px) {
+    @apply text-font-sm;
+  }
+  @media (min-width: 425px) {
+    @apply text-font-md;
+  }
+  @media (min-width: 768px) {
+    @apply text-font;
+  }
+}
+
+@utility links {
+  @apply relative
+  flex flex-row
+  justify-center items-center
+  p-links
+  rounded-2xl
+  bg-blue-700
+  text-white
+  font-bold
+  h-10 w-30;
+}
+
+@utility links-hover {
+  @apply hover:text-white 
+  hover:bg-blue-900 
+  hover:rounded-2xl
+  hover:scale-110;
+}
+
+@utility routes-hover {
+  @apply hover:text-orange-600;
+}
+
+@utility container_form {
+  @apply relative 
+  flex 
+  flex-row 
+  h-container-form 
+  w-full 
+  justify-center 
+  items-center;
+}
+
+@utility dashboard {
+  @apply relative
+  flex flex-col
+  h-auto w-full
+  justify-evenly
+  items-center
+  border border-violet-600;
+}
+
+@utility bmr {
+  @apply relative
+  h-full w-full
+  flex overflow-hidden;
+
+  @media (min-width: 320px) {
+    @apply flex-col items-center gap-5 p-5;
+  }
+  @media (min-width: 768px) {
+    @apply flex-col items-center gap-6 p-5;
+  }
+  @media (min-width: 1024px) {
+    @apply flex-row flex-wrap justify-evenly items-center gap-7 p-5;
+  }
+}
+
+@utility cards {
+  @apply border border-amber-500 rounded-2xl;
+
+  @media (min-width: 320px) {
+    @apply relative
+    flex flex-row
+    h-cards-xs w-cards-md
+    p-1
+    justify-center items-center;
+  }
+  @media (min-width: 768px) {
+    @apply relative
+    flex flex-row
+    h-cards-md w-cards-md
+    p-1.5
+    justify-center items-center;
+  }
+  @media (min-width: 1024px) {
+    @apply relative
+    flex flex-row
+    h-cards-lg w-cards-lg
+    p-2
+    justify-center items-center;
+  }
+}
+
+@utility subcards {
+  @apply border border-blue-300 rounded-2xl;
+
+  @media (min-width: 320px) {
+    @apply relative
+    flex flex-col gap-2
+    h-full w-full
+    justify-between items-center;
+  }
+  @media (min-width: 768px) {
+    @apply relative
+    flex flex-col gap-2
+    h-full w-full
+    justify-between items-center;
+  }
+  @media (min-width: 1024px) {
+    @apply relative
+    flex flex-col gap-4
+    h-full w-full
+    justify-between items-center;
+  }
+}
+
+@utility title_cards {
+  @apply relative
+  flex flex-row flex-2/12
+  w-full justify-center items-center
+  border border-violet-600 rounded-2xl;
+}
+
+@utility body_cards {
+  @apply relative
+  flex flex-7/12 flex-col
+  gap-2 p-2
+  w-full border border-orange-300 rounded-2xl;
+}
+
+@utility footer_cards {
+  @apply relative
+  flex flex-3/12 flex-row
+  justify-center items-center
+  w-full border border-orange-600 rounded-2xl;
+}
