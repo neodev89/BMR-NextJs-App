@@ -1,12 +1,14 @@
+import jwt from "jsonwebtoken";
 import { ApiResponse } from "@/src/@types/ApiResponse";
 import { db } from "@/src/db";
-import { registeredApp } from "@/src/db/schema/registered";
-import { loginSchema, loginSchemaType } from "@/src/zod/controlLogin";
+import { registeredApp, selectRegisteredAppType } from "@/src/db/schema/registered";
+import { loginSchema } from "@/src/zod/controlLogin";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
     try {
+        const firmToken = process.env.FIRM_TOKEN!;
         const cookieStore = await cookies();
         const body = await req.json();
         const bodyParsed = await loginSchema.parseAsync(body);
@@ -42,39 +44,44 @@ export async function POST(req: Request) {
             }, { status: 404 });
         }
 
-        try {
-            cookieStore.set(
-                "login-cookies",
-                findUser[0].id,
-                {
-                    maxAge: 60 * 60 * 24,
-                    httpOnly: true,
-                    sameSite: "lax",
-                }
-            );
+        const token = findUser[0].id; // JWT salvato in fase di register
 
-            const response: ApiResponse<loginSchemaType> = {
-                success: true,
-                message: "Il login è stato effettuato",
-                data: findUser[0],
-                status: 200,
+        try {
+            jwt.verify(token, firmToken);
+            // token ancora valido → lo riusi
+            console.log("Il token è ancora attivo")
+        } catch {
+            // token scaduto → ne generi uno nuovo
+            console.log("Token scaduto");
+            const response: ApiResponse<undefined> = {
+                success: false,
+                message: "Token scaduto! Andrà rigenerato",
+                data: undefined,
+                status: 401,
             };
             return Response.json(
                 response,
-                { status: 200 },
+                { status: 401 },
             );
-        } catch (err: Error | unknown) {
-            const response: ApiResponse<Error | unknown> = {
-                success: false,
-                message: "Token non valido o scaduto! Ne devi generare un altro nuovo",
-                data: err instanceof Error ? err.message : err,
-                status: 401,
-            }
-            return Response.json({
-                response,
-            }, { status: 401 });
         }
 
+        cookieStore.set("login-cookies", token, {
+            maxAge: 60 * 60 * 24,
+            httpOnly: true,
+            sameSite: "lax",
+            path: "/",
+        });
+
+        const response: ApiResponse<{ user: selectRegisteredAppType, tkn: string | jwt.JwtPayload }> = {
+            success: true,
+            message: "Trovato l'utente e il token",
+            data: { user: findUser[0], tkn: token },
+            status: 200,
+        };
+        return Response.json(
+            response,
+            { status: 200 },
+        );
     } catch (error: Error | unknown) {
         const mxs = error instanceof Error ? error.message : error;
         const response: ApiResponse<null> = {

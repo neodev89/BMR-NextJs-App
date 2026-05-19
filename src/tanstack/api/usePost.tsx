@@ -16,7 +16,7 @@ interface mutationProps<T> {
     isRegister?: boolean;
 }
 
-interface ResponseApiClient<K> {
+export interface ResponseApiClient<K> {
     status: number;
     res: ApiResponse<K>
 }

@@ -5,8 +5,8 @@ import CustomInput from "@/src/ui/components/CustomInput";
 import CloseIcon from '@mui/icons-material/Close';
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, IconButton } from "@mui/material";
-import { red } from "@mui/material/colors";
+import { Alert, Box, Button, IconButton, Snackbar, Typography } from "@mui/material";
+import { blue } from "@mui/material/colors";
 import { useState } from "react";
 import { Path, useForm, useWatch } from "react-hook-form";
 import { useCustomDeleteMutation } from "@/src/tanstack/api/useDelete";
@@ -29,8 +29,12 @@ export default function DashboardComponent() {
     const [gender, setGender] = useState<"M" | "F">("M");
     const [selectActivity, setSelectActivity] = useState<"Sedentario" | "Leggermente attivo" | "Moderatamente attivo" | "Molto attivo" | "Atleta">("Sedentario");
     const [bmr, setBmr] = useState<string>("0");
+    const [msgCalcBmr, setMsgCalcBmr] = useState<string>("");
+    const [openSnack, setOpenSnack] = useState(false);
+    const [severityAlert, setSeverityAlert] = useState<boolean>(false);
 
-    const { control, handleSubmit, setValue, reset } = useForm<bmrType>({
+
+    const { control, setValue, reset } = useForm<bmrType>({
         defaultValues: defaultState,
         resolver: zodResolver(bmrSchema),
     });
@@ -38,7 +42,7 @@ export default function DashboardComponent() {
     const router = useRouter();
 
     const escape = useCustomDeleteMutation<string>(["escape-delete-cookies"]);
-    const userBmr = useCustomMutation<bmrType, userBmrDbType>(["save-user-bmr"]);
+    const updateBmr = useCustomMutation<bmrType, userBmrDbType>(["save-user-bmr"]);
 
     const deleteItem = (name: Path<bmrType>) => {
         setValue(name, "");
@@ -62,17 +66,40 @@ export default function DashboardComponent() {
     };
 
 
-    const values = useWatch({ control });
+    const values = useWatch({
+        control,
+    });
+    const hasInvalidFields = Object.values(values ?? {}).some(v => {
+        const s = String(v).trim();
+        // 1. Controlla se è vuoto
+        if (s === "") return true;
+        // 2. Controlla se NON è un numero valido (solo cifre, una virgola o un punto)
+        const isValidNumber = /^[0-9]+([.,][0-9]+)?$/.test(s);
+        return !isValidNumber;
+    });
 
-    const allFilled = Object.values(values).every(v => v === "");
-
-    const handleCalculated = () => {
-        const res = calcBmr({ height, weight, age, selectActivity, gender });
-        console.log(`Calcolo eseguito su gender ${gender}: `, res);
-        if (res === 0) {
-            setBmr("0");
+    const handleCalculated = async () => {
+        try {
+            const res = calcBmr({ height, weight, age, selectActivity, gender });
+            console.log(`Calcolo eseguito su gender ${gender}: `, res);
+            if (res === 0) {
+                setBmr("0");
+            }
+            setBmr((res).toFixed(2));
+            const updateValueUser = await updateBmr.mutateAsync({
+                url: "/api/save-bmr",
+                body: { height, weight, age, activity: selectActivity, gender, bmr: (res).toFixed(2) }
+            });
+            if (updateValueUser.status === 500 || updateValueUser.status == 409 || updateValueUser.status === 404) {
+                setMsgCalcBmr(updateValueUser.res.message);
+                setSeverityAlert(updateValueUser.res.success);
+            };
+            setMsgCalcBmr(updateValueUser.res.message);
+            setOpenSnack(updateValueUser.res.success);
+            setSeverityAlert(updateValueUser.res.success);
+        } catch (error: Error | unknown) {
+            console.log("Errore nella chiamata API: ", error instanceof Error ? error.message : error);
         }
-        setBmr((res).toFixed(2));
     };
 
     const handleResetBmr = () => {
@@ -109,15 +136,15 @@ export default function DashboardComponent() {
     return (
         <LazyGlobalWrapper>
             <div className="dashboard">
-                <div className="relative flex flex-row h-20 w-full">
+                <div className="relative flex flex-row h-auto bg-transparent w-full">
                     <Button
                         type="button"
-                        color="primary"
                         variant="contained"
                         onClick={handleEsc}
                         sx={{
                             height: "2.5rem",
                             maxWidth: "12rem",
+                            backgroundColor: "#7f22fe",
                         }}
                     >
                         Esci
@@ -125,12 +152,12 @@ export default function DashboardComponent() {
                 </div>
                 <div className="bmr">
                     {/** Qui andranno due tabelle sulla riga identica */}
-                    <div className="cards">
+                    <div className="cards gradient-border">
                         <div className="subcards">
                             <div className="title_cards">
                                 <p>BMR</p>
                             </div>
-                            <form>
+                            <form className="relative flex flex-row h-auto w-full">
                                 <div className="body_cards">
                                     <CustomInput
                                         control={control}
@@ -142,7 +169,8 @@ export default function DashboardComponent() {
                                         control={control}
                                         name={"weight"}
                                         deleteItem={deleteItem}
-                                        placeholder="weight in kg"
+                                        placeholder="weight in kg es 90.5"
+                                        inputMode="decimal"
                                     />
                                     <CustomInput
                                         control={control}
@@ -150,7 +178,32 @@ export default function DashboardComponent() {
                                         deleteItem={deleteItem}
                                         placeholder="age"
                                     />
-                                    <BasicMenu items={activities} value={selectActivity} setValue={setSelectActivity} />
+                                    <Box sx={{
+                                        position: "relative",
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        width: "100%",
+                                        height: "auto",
+                                        justifyContent: "space-between",
+                                    }}>
+                                        <BasicMenu items={activities} value={selectActivity} setValue={setSelectActivity} />
+                                        <Box sx={{
+                                            position: "relative",
+                                            display: "flex",
+                                            height: "100%",
+                                            width: "50%",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}>
+                                            <Typography variant={'body1'} sx={{
+                                                color: "white",
+                                                fontWeight: 500,
+                                                textAlign: "center",
+                                            }}>
+                                                {selectActivity}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
                                     <Box sx={{
                                         position: "relative",
                                         display: "flex",
@@ -161,12 +214,23 @@ export default function DashboardComponent() {
                                     }}>
                                         <Button
                                             type="button"
-                                            color="primary"
                                             variant="outlined"
-                                            disabled={allFilled}
+                                            disabled={hasInvalidFields}
                                             sx={{
                                                 height: "2.5rem",
                                                 maxWidth: "80%",
+                                                borderRadius: 2,
+                                                // Stile normale
+                                                border: "1px solid #7f22fe",
+                                                boxShadow: "0 0 30px rgba(138, 43, 226, 0.4)",
+                                                color: "#b385f7",
+                                                // Stile quando è disabilitato (opzionale, per evitare che MUI lo faccia grigio)
+                                                "&.Mui-disabled": {
+                                                    border: "1px solid #7f22fe",
+                                                    opacity: 0.5,
+                                                    color: "#b385f7",
+                                                    boxShadow: "none",
+                                                }
                                             }}
                                             onClick={handleCalculated}
                                         >
@@ -182,7 +246,7 @@ export default function DashboardComponent() {
                                         alignItems: "center",
                                     }}>
                                         {bmr}
-                                        {(bmr !== "0" || !bmr) && <IconButton
+                                        {(bmr !== "0" || !bmr || !hasInvalidFields) && <IconButton
                                             onClick={handleResetBmr}
                                         >
                                             <CloseIcon color="error" />
@@ -196,7 +260,7 @@ export default function DashboardComponent() {
                                     sx={{
                                         height: "2.5rem",
                                         maxWidth: "80%",
-                                        backgroundColor: `${gender === "M" ? "primary" : red[400]}`
+                                        backgroundColor: `${gender === "M" ? blue[900] : "#7a25f9"}`
                                     }}
                                     variant="contained"
                                     onClick={handleGender}>
@@ -205,18 +269,25 @@ export default function DashboardComponent() {
                             </div>
                         </div>
                     </div>
-                    <div className="cards">
-                        <div className="subcards">
-                            <div className="title_cards">
-                                <p>ICM</p>
-                            </div>
-                            <div className="body_cards"></div>
-                            <div className="footer_cards"></div>
-                        </div>
-                    </div>
+
                 </div>
                 <div>
-                    {/** non ho deciso cosa mettere */}
+                    <Snackbar
+                        open={openSnack}
+                        autoHideDuration={3000}
+                        onClose={() => setOpenSnack(false)}
+                        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                    >
+                        <Alert
+                            onClose={() => setOpenSnack(false)}
+                            severity={severityAlert ? "success" : "error"}
+                            variant="filled"
+                            sx={{ width: "100%" }}
+                        >
+                            {msgCalcBmr}
+                        </Alert>
+                    </Snackbar>
+
                 </div>
             </div>
         </LazyGlobalWrapper>

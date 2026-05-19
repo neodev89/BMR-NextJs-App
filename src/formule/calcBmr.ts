@@ -13,9 +13,9 @@ export default function calcBmr({
         return 0;
     }
 
-    const replaceH = height.replace(",", ".");
-    const replaceW = weight.replace(",", ".");
-    const replaceA = age.replace(",", ".");
+    const replaceH = height.trim().replace(",", ".");
+    const replaceW = weight.trim().replace(",", ".");
+    const replaceA = age.trim().replace(",", ".");
 
     const hNum = Number(replaceH);
     const wNum = Number(replaceW);

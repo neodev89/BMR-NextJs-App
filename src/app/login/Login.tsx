@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import { Path, useForm, useWatch } from "react-hook-form";
 import { loginSchema, loginSchemaType } from "@/src/zod/controlLogin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, Button } from "@mui/material";
+import { Alert, Button, CircularProgress, Typography } from "@mui/material";
 import { useCustomMutation } from "@/src/tanstack/api/usePost";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -33,9 +33,9 @@ export default function LoginComponent() {
     const [isAlert, setIsAlert] = useState<boolean>(false);
     const [apiMxg, setApiMxg] = useState<string>("");
 
-    const login = useCustomMutation<loginSchemaType, selectRegisteredAppType>(["login-key-mutation"]);
+    const login = useCustomMutation<loginSchemaType, { user: selectRegisteredAppType, tkn: string }>(["login-key-mutation"]);
     const rigeneraToken = useCustomPutMutation<string, string>(["rigenera-token-login"]);
-    
+
     const handleResetField = useCallback(() => {
         reset({
             userName: "",
@@ -69,23 +69,16 @@ export default function LoginComponent() {
                 url: "/api/login",
                 body: data,
             });
-
-            if (result.status === 400) {
-                setIsRegister(true);
-                setApiMxg(result.res.message);
-            }
-            if (result.status === 404) {
-                setIsRegister(true);
-                setApiMxg(result.res.message);
-            }
+            
             if (result.status === 200) {
                 console.log("Ci sono sia i dati che il name", result.res);
-                router.push(`/${result.res.data.name}/dashboard`);
+                router.push(`/${result.res.data.user.name}/dashboard`);
             }
-            if (result.status === 401) {
+            if (result.status === 400 || result.status === 401 || result.status === 404) {
                 console.log(result.res.message);
                 setApiMxg(result.res.message);
                 setIsAlert(true);
+                router.push("/login");
             }
 
             // if (result.res) {
@@ -111,6 +104,11 @@ export default function LoginComponent() {
                 router.push(`/${name}/dashboard`);
                 setIsRegister(false);
             }
+            if (result.status === 401) {
+                setIsAlert(true);
+                setApiMxg(result.res.message);
+            }
+            setApiMxg(result.res.message);
         } catch (error: Error | unknown) {
             const mxg = error instanceof Error ? error.message : error;
             console.log("Errore nella chiamata API ", mxg);
@@ -139,104 +137,119 @@ export default function LoginComponent() {
 
     return (
         <LazyGlobalWrapper>
-            <div className="container_form">
-                <form className="relative flex flex-col h-full w-1/3 justify-center border border-green-300 rounded-2xl p-4">
-                    <div className="relative flex flex-col w-full h-auto gap-3 py-2 px-1">
-                        {/** Qui andrà il modulo */}
-                        <CustomInput
-                            control={control}
-                            name="userName"
-                            deleteItem={deleteItem}
-                            label="email"
-                            type="email"
-                            placeholder="email"
-                        />
-                        <CustomInput
-                            control={control}
-                            name="password"
-                            deleteItem={deleteItem}
-                            label="password"
-                            type="password"
-                            placeholder="password"
-                        />
-                        <CustomInput
-                            control={control}
-                            name="name"
-                            deleteItem={deleteItem}
-                            label="name"
-                            type="text"
-                            placeholder="name"
-                        />
+            {
+                (login.isPending) ? (
+                    <div className="relative flex flex-row w-full justify-center items-center">
+                        <CircularProgress size={50} />
+                    </div>
+                ) : (
+                    <>
                         {
-                            isAlert &&
-                            (
-                                <>
-                                    <Alert severity="error">{apiMxg}</Alert>
-                                    <Button
-                                        type="button"
-                                        color="error"
-                                        variant="contained"
-                                        sx={{
-                                            height: "2.5rem",
-                                            maxWidth: "80%",
-                                        }}
-                                        onClick={handleToken}
-                                    >
-                                        Rigenera token
-                                    </Button>
-                                </>
+                            login.isError ? (
+                                <Typography variant="h3" color="error">
+                                    {login.error.message}
+                                </Typography>
+                            ) : (
+                                <div className="container_form">
+                                    <form className="form">
+                                        <div className="inner_form">
+                                            {/** Qui andrà il modulo */}
+                                            <CustomInput
+                                                control={control}
+                                                name="userName"
+                                                deleteItem={deleteItem}
+                                                label="email"
+                                                type="email"
+                                                placeholder="email"
+                                            />
+                                            <CustomInput
+                                                control={control}
+                                                name="password"
+                                                deleteItem={deleteItem}
+                                                label="password"
+                                                type="password"
+                                                placeholder="password"
+                                            />
+                                            <CustomInput
+                                                control={control}
+                                                name="name"
+                                                deleteItem={deleteItem}
+                                                label="name"
+                                                type="text"
+                                                placeholder="name"
+                                            />
+                                            {
+                                                isAlert &&
+                                                (
+                                                    <>
+                                                        <Alert severity="error">{apiMxg}</Alert>
+                                                        <Button
+                                                            type="button"
+                                                            color="error"
+                                                            variant="contained"
+                                                            sx={{
+                                                                height: "2.5rem",
+                                                                maxWidth: "80%",
+                                                            }}
+                                                            onClick={handleToken}
+                                                        >
+                                                            Rigenera token
+                                                        </Button>
+                                                    </>
+                                                )
+                                            }
+                                        </div>
+                                        <div className="relative flex flex-row justify-between h-24 w-full">
+                                            {/** qui il submit */}
+                                            {isRegister ? (
+                                                <>
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleResetFieldAndBack}
+                                                        sx={{ height: "3.5rem", width: "11rem", border: "1px solid #7f22fe", color: "7f22fe" }}
+                                                    >
+                                                        Cancella campi
+                                                    </Button>
+                                                    <Button
+                                                        type="submit"
+                                                        variant="outlined"
+                                                        onClick={handleSubmit(handleSubmitRegister)}
+                                                        sx={{
+                                                            height: "3.5rem", width: "10rem",
+                                                            color: "#7f22fe"
+                                                        }}
+                                                    >
+                                                        Registrati
+                                                    </Button>
+                                                    <Alert severity="error">{apiMxg}</Alert>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleResetField}
+                                                        sx={{ height: "3.5rem", width: "11rem", border: "1px solid #7f22fe", color: "#7f22fe" }}
+                                                    >
+                                                        Cancella campi
+                                                    </Button>
+                                                    <Button
+                                                        type="submit"
+                                                        variant="contained"
+                                                        onClick={handleSubmit(handleSubmitForm)}
+                                                        sx={{ height: "3.5rem", width: "8rem", backgroundColor: "#7f22fe", color: "white" }}
+                                                    >
+                                                        Invia
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </form>
+                                </div>
                             )
                         }
-                    </div>
-                    <div className="relative flex flex-row justify-between h-24 w-full">
-                        {/** qui il submit */}
-                        {isRegister ? (
-                            <>
-                                <Button
-                                    type="button"
-                                    color="primary"
-                                    onClick={handleResetFieldAndBack}
-                                    sx={{ height: "3.5rem", width: "11rem", border: "1px solid #1976d2" }}
-                                >
-                                    Cancella campi
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    color="primary"
-                                    variant="outlined"
-                                    onClick={handleSubmit(handleSubmitRegister)}
-                                    sx={{
-                                        height: "3.5rem", width: "10rem",
-                                    }}
-                                >
-                                    Registrati
-                                </Button>
-                                <Alert severity="error">{apiMxg}</Alert>
-                            </>
-                        ) : (
-                            <>
-                                <Button
-                                    type="button"
-                                    color="primary"
-                                    onClick={handleResetField}
-                                    sx={{ height: "3.5rem", width: "11rem", border: "1px solid #1976d2" }}
-                                >
-                                    Cancella campi
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    color="primary"
-                                    variant="contained"
-                                    onClick={handleSubmit(handleSubmitForm)}
-                                    sx={{ height: "3.5rem", width: "8rem" }}
-                                >
-                                    Invia
-                                </Button>
-                            </>
-                        )}
-                    </div>
-                </form>
-            </div>
+                    </>
+                )
+            }
         </LazyGlobalWrapper>
     )
 }

@@ -17,7 +17,7 @@ export default function GlobalWrapper({
     const [open, setOpen] = useState<boolean>(false);
 
     return (
-        <div className="flex flex-col justify-between min-h-dvh w-full overflow-y-auto overflow-x-hidden bg-black">
+        <div className="wrapper">
             <div className="navbar">
                 {
                     listenWidth > 768 ?

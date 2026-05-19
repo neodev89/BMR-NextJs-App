@@ -32,15 +32,20 @@ export default function BasicMenu({ items, value, setValue }: menuItemsProps) {
     };
 
     return (
-        <div>
+        <div className="flex flex-col w-1/2 h-auto">
             <Button
                 id={buttonId}
                 aria-controls={open ? menuId : undefined}
                 aria-haspopup="true"
                 aria-expanded={open}
+                sx={{
+                    color: "white",
+                    backgroundColor: "#7f22fe",
+                    fontWeight: 600,
+                }}
                 onClick={handleClick}
             >
-                {value}
+                Stile di vita
             </Button>
             <Menu
                 id={menuId}

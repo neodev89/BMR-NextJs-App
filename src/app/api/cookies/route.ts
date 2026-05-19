@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { db } from "@/src/db";
 import { registeredApp } from "@/src/db/schema/registered";
 import { eq } from "drizzle-orm";
-import { loginSchema } from "@/src/zod/controlLogin";
 
 export async function GET() {
     try {
@@ -28,7 +27,7 @@ export async function GET() {
 
         try {
             const verified = jwt.verify(userCookie, firmToken) as jwt.JwtPayload;
-
+            console.log("token validato: ", verified);
             return Response.json({
                 success: true,
                 message: "Il cookie è stato verificato",
