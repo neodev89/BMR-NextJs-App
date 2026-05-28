@@ -4,7 +4,7 @@ import { db } from "@/src/db";
 import { registeredApp } from "@/src/db/schema/registered";
 import { userBmr } from "@/src/db/schema/userBmr";
 import { bmrSchema, userBmrDbType } from "@/src/zod/userBmrSchema";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 
 

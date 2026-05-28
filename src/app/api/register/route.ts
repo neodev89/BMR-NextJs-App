@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 
+import { v4 as uuidv4 } from "uuid";
 import { ApiResponse } from "@/src/@types/ApiResponse";
 import { db } from "@/src/db";
 import { insertRegisteredAppType, registeredApp } from "@/src/db/schema/registered";
@@ -62,9 +63,10 @@ export async function POST(req: Request) {
         );
 
         const completeUser: insertRegisteredAppType = {
-            id: token,
-            createdAt: new Date(),
             ...bodyParsed,
+            id: uuidv4(),
+            createdAt: new Date(),
+            token: token,
         }
 
         await db

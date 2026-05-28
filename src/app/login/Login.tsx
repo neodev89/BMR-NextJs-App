@@ -8,11 +8,10 @@ import { Path, useForm, useWatch } from "react-hook-form";
 import { loginSchema, loginSchemaType } from "@/src/zod/controlLogin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
-import { useCustomMutation } from "@/src/tanstack/api/usePost";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { selectRegisteredAppType } from "@/src/db/schema/registered";
-import { useCustomPutMutation } from "@/src/tanstack/api/usePut";
+import { useTotalCustomMutation } from "@/src/tanstack/api/useTotalMutation";
 
 const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
     ssr: false,
@@ -20,7 +19,7 @@ const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWra
 
 
 export default function LoginComponent() {
-    const { control, getValues, reset, setValue, handleSubmit } = useForm<loginSchemaType>({
+    const { control, reset, setValue, handleSubmit } = useForm<loginSchemaType>({
         defaultValues: {
             userName: "",
             password: "",
@@ -28,13 +27,22 @@ export default function LoginComponent() {
         },
         resolver: zodResolver(loginSchema),
     });
+
+    const userName = useWatch({
+        control,
+        name: "userName",
+    });
     const router = useRouter();
     const [isRegister, setIsRegister] = useState<boolean>(false);
     const [isAlert, setIsAlert] = useState<boolean>(false);
     const [apiMxg, setApiMxg] = useState<string>("");
 
-    const login = useCustomMutation<loginSchemaType, { user: selectRegisteredAppType, tkn: string }>(["login-key-mutation"]);
-    const rigeneraToken = useCustomPutMutation<string, string>(["rigenera-token-login"]);
+    const login = useTotalCustomMutation<loginSchemaType, { user: selectRegisteredAppType, tkn: string } | null | undefined>({
+        mutationKey: ["login-key-mutation"],
+    });
+    const rigeneraToken = useTotalCustomMutation<string, string>({
+        mutationKey: ["rigenera-token-login"],
+    });
 
     const handleResetField = useCallback(() => {
         reset({
@@ -67,18 +75,24 @@ export default function LoginComponent() {
         try {
             const result = await login.mutateAsync({
                 url: "/api/login",
+                method: "POST",
                 body: data,
             });
-            
-            if (result.status === 200) {
+
+            if (result.status === 200 && result.res.data) {
                 console.log("Ci sono sia i dati che il name", result.res);
-                router.push(`/${result.res.data.user.name}/dashboard`);
+                router.push(`/${result.res.data?.user.name}/dashboard`);
             }
-            if (result.status === 400 || result.status === 401 || result.status === 404) {
+            if (result.status === 401 || result.status === 404) {
                 console.log(result.res.message);
                 setApiMxg(result.res.message);
                 setIsAlert(true);
                 router.push("/login");
+            }
+            if (result.status === 400) {
+                setIsAlert(false);
+                setApiMxg(result.res.message);
+                setIsRegister(true);
             }
 
             // if (result.res) {
@@ -108,6 +122,7 @@ export default function LoginComponent() {
                 setIsAlert(true);
                 setApiMxg(result.res.message);
             }
+
             setApiMxg(result.res.message);
         } catch (error: Error | unknown) {
             const mxg = error instanceof Error ? error.message : error;
@@ -117,9 +132,9 @@ export default function LoginComponent() {
 
     const handleToken = async () => {
         try {
-            const userName = getValues("userName");
             const result = await rigeneraToken.mutateAsync({
                 url: "/api/cookies",
+                method: "PUT",
                 body: userName,
             });
 
@@ -134,6 +149,8 @@ export default function LoginComponent() {
     useEffect(() => {
         console.log(name);
     }, [name]);
+
+    // vecchio token ponzio: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBvbnppb0BwaWxhdG8uaXQiLCJpYXQiOjE3NzkyMDU4MjAsImV4cCI6MTc3OTI5MjIyMH0.cmc634zpgIVwzfj02KvBnKzieVjgu3oQmHGqX4wnl00
 
     return (
         <LazyGlobalWrapper>
@@ -202,7 +219,7 @@ export default function LoginComponent() {
                                         <div className="relative flex flex-row justify-between h-24 w-full">
                                             {/** qui il submit */}
                                             {isRegister ? (
-                                                <>
+                                                <div className="relative flex flex-row justify-between items-center min-h-20 h-auto gap-2 flex-wrap w-full">
                                                     <Button
                                                         type="button"
                                                         onClick={handleResetFieldAndBack}
@@ -222,7 +239,7 @@ export default function LoginComponent() {
                                                         Registrati
                                                     </Button>
                                                     <Alert severity="error">{apiMxg}</Alert>
-                                                </>
+                                                </div>
                                             ) : (
                                                 <>
                                                     <Button

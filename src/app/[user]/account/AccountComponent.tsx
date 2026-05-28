@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useGet } from "@/src/tanstack/api/useGet";
 import { userBmrDbType } from "@/src/zod/userBmrSchema";
-import { Fragment } from "react/jsx-runtime";
 import { usePathname } from "next/navigation";
 
 const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {

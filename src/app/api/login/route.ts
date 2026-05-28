@@ -5,6 +5,7 @@ import { registeredApp, selectRegisteredAppType } from "@/src/db/schema/register
 import { loginSchema } from "@/src/zod/controlLogin";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { responseObjApi } from "@/src/middleware/responseObjeApi";
 
 export async function POST(req: Request) {
     try {
@@ -32,19 +33,17 @@ export async function POST(req: Request) {
 
         console.log("la lista di utenti trovati è: ", findUser);
 
+
         if (!findUser[0]) {
-            const response: ApiResponse<null> = {
+            return responseObjApi<null>({
                 success: false,
                 message: "L'utente non risulta registrato",
                 data: null,
-                status: 404,
-            }
-            return Response.json({
-                response,
-            }, { status: 404 });
+                status: 400,
+            }) ;
         }
 
-        const token = findUser[0].id; // JWT salvato in fase di register
+        const token = findUser[0].token; // JWT salvato in fase di register
 
         try {
             jwt.verify(token, firmToken);

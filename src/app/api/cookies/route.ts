@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { db } from "@/src/db";
 import { registeredApp } from "@/src/db/schema/registered";
 import { eq } from "drizzle-orm";
+import { responseObjApi } from "@/src/middleware/responseObjeApi";
 
 export async function GET() {
     try {
@@ -93,8 +94,9 @@ export async function PUT(req: Request) {
                 expiresIn: 60 * 60 * 24,
             }
         );
+        console.log("Il token generato è: ", newToken);
 
-        cookieStore.set(
+        const newCookies = cookieStore.set(
             "login-cookies",
             newToken,
             {
@@ -106,15 +108,29 @@ export async function PUT(req: Request) {
             }
         );
 
+        const cookiesValue = newCookies.get("login-cookies")?.value;
+        if (!cookiesValue) {
+            responseObjApi({
+                success: false,
+                message: "Token non aggiunto al cookie",
+                data: null,
+                status: 505,
+            });
+        }
+        console.log("Il token inserito nei cookies è: ", cookiesValue)
+
         await db
             .update(registeredApp)
-            .set({ id: newToken })
+            .set({
+                ...registeredApp,
+                token: cookiesValue,
+            })
             .where(eq(registeredApp.userName, userName));
 
         const response: ApiResponse<string> = {
             success: true,
             message: "Token nuovo validato",
-            data: newToken,
+            data: cookiesValue!,
             status: 200,
         };
         return Response.json(
