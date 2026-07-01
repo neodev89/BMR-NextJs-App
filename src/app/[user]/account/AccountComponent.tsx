@@ -2,9 +2,12 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import CloseIcon from "@mui/icons-material/CloseOutlined";
 import { useGet } from "@/src/tanstack/api/useGet";
 import { userBmrDbType } from "@/src/zod/userBmrSchema";
 import { usePathname } from "next/navigation";
+import { CircularProgress, IconButton, Typography } from "@mui/material";
+import { useCustomDeleteMutation } from "@/src/tanstack/api/useDelete";
 
 const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
     ssr: false,
@@ -31,14 +34,34 @@ export default function AccountComponent() {
     const slug = decodeURIComponent(rawSlug); // <-- FIX
     const goBack = `/${slug}/dashboard`;
 
-
     const userBmr = useGet<userBmrDbType[]>({
         key: ["get-data-bmr-user"],
         url: "/api/save-bmr",
         enabled: true,
+        staleTime: 60 * 10,
+        retry: 3,
+        gcTime: 60 * 60 * 20,
     });
-    console.log("i dati del'utente sono: ", userBmr.data?.data ?? []);
     const risultati = userBmr.data ? userBmr.data.data : [];
+    console.log("i dati del'utente sono: ", userBmr.data?.data ?? []);
+
+    const deleteRecord = useCustomDeleteMutation<number, userBmrDbType[]>({
+        mutationKey: ["delete-selected-record"],
+    });
+
+    const handleDeleteRecord = async (id: number) => {
+        try {
+            const res = await deleteRecord.mutateAsync({
+                url: "/api/save-bmr",
+                body: id,
+                invalidateKeys: ["get-data-bmr-user"]
+            });
+            if (res.status === 500) return;
+            console.log("Record eliminato");
+        } catch (error: Error | unknown) {
+            console.log("Errore nella chiamata API: ", error instanceof Error ? error.message : error);
+        }
+    }
 
     return (
         <LazyGlobalWrapper>
@@ -88,11 +111,27 @@ export default function AccountComponent() {
                                                     <p>In data:</p>
                                                     <p>{newDate}</p>
                                                 </div>
+                                                <div className="flex flex-row justify-between w-full h-10">
+                                                    <IconButton onClick={() => handleDeleteRecord(el.id)}>
+                                                        <CloseIcon color="error" fontSize="large" />
+                                                    </IconButton>
+                                                </div>
                                             </div>
                                         );
                                     })
                                 ) : (
-                                    <p>Nessun risultato trovato</p>
+                                    <>
+                                        {
+                                            userBmr.isLoading ? (
+                                                <Typography component={'span'}>
+                                                    <CircularProgress />
+                                                    Dati in caricamento...
+                                                </Typography>
+                                            ) : (
+                                                <p>Nessun dato trovato</p>
+                                            )
+                                        }
+                                    </>
                                 )}
                             </div>
 

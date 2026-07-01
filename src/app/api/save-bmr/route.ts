@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import jwt from "jsonwebtoken";
 import { ApiResponse } from "@/src/@types/ApiResponse";
 import { db } from "@/src/db";
@@ -6,6 +8,7 @@ import { userBmr } from "@/src/db/schema/userBmr";
 import { bmrSchema, userBmrDbType } from "@/src/zod/userBmrSchema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { responseObjApi } from "@/src/middleware/responseObjApi";
 
 
 async function getNextBmrId() {
@@ -53,7 +56,7 @@ export async function POST(req: Request) {
         const user = await db
             .select()
             .from(registeredApp)
-            .where(eq(registeredApp.id, userToken))
+            .where(eq(registeredApp.token, userToken))
             .limit(1);
         console.log("Utente attivo: ", user[0]);
 
@@ -240,15 +243,15 @@ export async function GET() {
             .where(eq(userBmr.userName, mail));
 
         if (user.length === 0) {
-            const response: ApiResponse<null> = {
+            const response: ApiResponse<[]> = {
                 success: false,
                 message: "Lista BMR vuota",
-                data: null,
-                status: 404,
+                data: [],
+                status: 203,
             };
             return Response.json(
                 response,
-                { status: 404 },
+                { status: 203 },
             );
         }
 
@@ -276,3 +279,88 @@ export async function GET() {
         );
     }
 };
+
+export async function DELETE(req: Request) {
+    try {
+        const body = await req.json();
+        const parsedBody = parseInt(body);
+        const firmToken = process.env.FIRM_TOKEN!;
+        const cookieStore = await cookies();
+        const token = cookieStore.get("login-cookies")?.value;
+        if (!token) {
+
+            return responseObjApi<undefined>({
+                success: false,
+                message: "Nessun token presente",
+                data: undefined,
+                status: 404,
+            });
+        }
+
+        let decoded: string | jwt.JwtPayload;
+
+        try {
+            decoded = jwt.verify(token, firmToken) as jwt.JwtPayload;
+        } catch (err: Error | unknown) {
+
+            return responseObjApi({
+                success: false,
+                message: "Token non valido o scaduto",
+                data: err instanceof Error ? err.message : err,
+                status: 401,
+            });
+        }
+        const mail = decoded.email;
+
+        const user = await db
+            .select()
+            .from(userBmr)
+            .where(eq(userBmr.userName, mail));
+
+        if (user.length === 0) {
+            
+            return responseObjApi<null>({
+                success: false,
+                message: "Lista BMR vuota",
+                data: null,
+                status: 404,
+            });
+        }
+
+        const selectedBmrResult = await db
+            .query
+            .userBmr
+            .findFirst({
+                where: eq(userBmr.id, parsedBody),
+            });
+
+        if (!selectedBmrResult) {
+            return responseObjApi<null>({
+                success: false,
+                message: "Nessun BMR salvato questo ID",
+                data: null,
+                status: 404,
+            });
+        }
+
+        const deletedRecord = await db
+            .delete(userBmr)
+            .where(eq(userBmr.id, parsedBody))
+            .returning();
+
+        return responseObjApi<userBmrDbType[]>({
+            success: true,
+            message: "Ultimo record eliminato",
+            data: deletedRecord,
+            status: 200,
+        });
+
+    } catch (error: Error | unknown) {
+        return responseObjApi<unknown>({
+            success: false,
+            message: "Errore nella chiamata alla API",
+            data: error instanceof Error ? error.message : error,
+            status: 500,
+        })
+    }
+}

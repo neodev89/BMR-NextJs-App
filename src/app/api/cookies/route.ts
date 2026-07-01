@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { db } from "@/src/db";
 import { registeredApp } from "@/src/db/schema/registered";
 import { eq } from "drizzle-orm";
-import { responseObjApi } from "@/src/middleware/responseObjeApi";
+import { responseObjApi } from "@/src/middleware/responseObjApi";
 
 export async function GET() {
     try {
@@ -14,52 +14,41 @@ export async function GET() {
         const userCookie = cookieStore.get("login-cookies")?.value;
 
         if (!userCookie) {
-            const response: ApiResponse<null> = {
+            return responseObjApi<null>({
                 success: false,
                 message: "Il cookie non esiste!",
                 data: null,
                 status: 404,
-            };
-            return Response.json(
-                response,
-                { status: 404 },
-            );
+            });
         }
 
         try {
             const verified = jwt.verify(userCookie, firmToken) as jwt.JwtPayload;
             console.log("token validato: ", verified);
-            return Response.json({
+            return responseObjApi<jwt.JwtPayload>({
                 success: true,
                 message: "Il cookie è stato verificato",
                 data: verified,
                 status: 200,
-            }, { status: 200 });
+            });
 
         } catch (err: Error | unknown) {
-            const response: ApiResponse<Error | unknown> = {
+            return responseObjApi<Error | unknown>({
                 success: false,
                 message: "Token non valido o scaduto",
                 data: err instanceof Error ? err.message : err,
                 status: 401,
-            }
-            return Response.json({
-                response,
-            }, { status: 401 });
+            });
         }
     } catch (error: Error | unknown) {
         const mxs = error instanceof Error ? error.message : error;
-        const response: ApiResponse<null> = {
+
+        return responseObjApi<null>({
             success: false,
             message: JSON.stringify(mxs, null, 2),
             data: null,
             status: 500
-        };
-
-        return Response.json(
-            response,
-            { status: 500 }
-        );
+        });
     }
 }
 
@@ -74,17 +63,12 @@ export async function PUT(req: Request) {
             .where(eq(registeredApp.userName, userName));
 
         if (userDb.length === 0) {
-            const response: ApiResponse<undefined> = {
+            return responseObjApi<undefined>({
                 success: false,
                 message: "Nessun token associato nella lista utenti",
                 data: undefined,
                 status: 404,
-            };
-            console.log(response);
-            return Response.json(
-                response,
-                { status: 404 },
-            );
+            });
         }
 
         const newToken = jwt.sign(
@@ -127,30 +111,22 @@ export async function PUT(req: Request) {
             })
             .where(eq(registeredApp.userName, userName));
 
-        const response: ApiResponse<string> = {
+        return responseObjApi<string>({
             success: true,
             message: "Token nuovo validato",
             data: cookiesValue!,
             status: 200,
-        };
-        return Response.json(
-            response,
-            { status: 200 },
-        );
+        });
 
     } catch (error: Error | unknown) {
         const mxs = error instanceof Error ? error.message : error;
-        const response: ApiResponse<null> = {
+
+        return responseObjApi<null>({
             success: false,
             message: JSON.stringify(mxs),
             data: null,
             status: 500
-        };
-
-        return Response.json(
-            response,
-            { status: 500 }
-        );
+        });
     }
 };
 

@@ -5,7 +5,7 @@ import { registeredApp, selectRegisteredAppType } from "@/src/db/schema/register
 import { loginSchema } from "@/src/zod/controlLogin";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { responseObjApi } from "@/src/middleware/responseObjeApi";
+import { responseObjApi } from "@/src/middleware/responseObjApi";
 
 export async function POST(req: Request) {
     try {

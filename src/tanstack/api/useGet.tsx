@@ -4,7 +4,7 @@ import { ApiResponse } from "@/src/@types/ApiResponse";
 import instance from "@/src/axios/instance"
 import { NetworkMode, useQuery } from "@tanstack/react-query";
 
-interface QueryConfig {
+export interface QueryConfig {
     key: string[];
     url: string;
     enabled?: boolean;

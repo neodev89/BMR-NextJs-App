@@ -15,6 +15,7 @@ import { useTotalCustomMutation } from "@/src/tanstack/api/useTotalMutation";
 
 const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
     ssr: false,
+    loading: () => <p>In caricamento...</p>
 });
 
 

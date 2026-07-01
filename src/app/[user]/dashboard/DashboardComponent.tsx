@@ -1,5 +1,7 @@
 'use client'
 
+import dynamic from "next/dynamic";
+import BasicMenu from "@/src/ui/components/menu/Menu";
 import calcBmr from "@/src/formule/calcBmr";
 import CustomInput from "@/src/ui/components/CustomInput";
 import CloseIcon from '@mui/icons-material/Close';
@@ -7,12 +9,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Box, Button, IconButton, Snackbar, Typography } from "@mui/material";
 import { blue } from "@mui/material/colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Path, useForm, useWatch } from "react-hook-form";
 import { useCustomDeleteMutation } from "@/src/tanstack/api/useDelete";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import BasicMenu from "@/src/ui/components/menu/Menu";
 import { bmrSchema, bmrType, userBmrDbType } from "@/src/zod/userBmrSchema";
 import { useCustomMutation } from "@/src/tanstack/api/usePost";
 
@@ -41,7 +41,7 @@ export default function DashboardComponent() {
 
     const router = useRouter();
 
-    const escape = useCustomDeleteMutation<string>(["escape-delete-cookies"]);
+    const escape = useCustomDeleteMutation<string, void>({ mutationKey: ["escape-delete-cookies"] });
     const updateBmr = useCustomMutation<bmrType, userBmrDbType>(["save-user-bmr"]);
 
     const deleteItem = (name: Path<bmrType>) => {
@@ -65,10 +65,10 @@ export default function DashboardComponent() {
         setGender(prev => prev === "M" ? "F" : "M");
     };
 
-
     const values = useWatch({
         control,
     });
+
     const hasInvalidFields = Object.values(values ?? {}).some(v => {
         const s = String(v).trim();
         // 1. Controlla se è vuoto
@@ -102,6 +102,10 @@ export default function DashboardComponent() {
         }
     };
 
+    useEffect(() => {
+        console.log("Il messaggio dell'API salvataggio dati BMR dice: ", msgCalcBmr);
+    }, [msgCalcBmr]);
+
     const handleResetBmr = () => {
         setBmr("0");
         reset({
@@ -116,6 +120,7 @@ export default function DashboardComponent() {
         try {
             const res = await escape.mutateAsync({
                 url: "/api/cookies",
+                body: "",
             });
             if (res.status === 500) return;
             router.push("/login");
