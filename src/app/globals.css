@@ -97,17 +97,17 @@ body {
     white 90%
   );
 
-  --_force-rebuild: 2;
+  --_force-rebuild: 4;
 
 }
 
 /* Global Wrapper*/
 @utility wrapper {
   @apply relative flex flex-col
-  justify-between gap-2
+  justify-start py-1
   min-h-dvh min-w-full 
   overflow-y-auto overflow-x-hidden 
-  bg-black
+  bg-black border;
 }
 
 @utility navbar {
@@ -117,13 +117,13 @@ body {
   border-b border-(--border-white);
   
   @media (min-width: 320px) {
-    @apply h-26
-    w-full p-nv-xs;
+    @apply h-20
+    w-full;
   }
 
   @media (min-width: 768px) {
-    @apply h-22
-    w-full p-nv-md;
+    @apply h-12
+    w-full;
   }
 }
 
@@ -137,7 +137,7 @@ body {
   @media (min-width: 768px) {
     @apply relative
     flex flex-row flex-1
-    h-full w-full;
+    min-h-full w-full;
   }
 }
 
@@ -149,10 +149,10 @@ body {
 @utility link-menu {
   @media (min-width: 320px) {
     @apply relative
-    flex flex-col flex-8/12
+    flex flex-col flex-8/12 min-w-full
     items-center justify-start
     gap-5
-    p-5;
+    p-2;
   }
   @media (min-width: 768px) {
     @apply relative
@@ -203,7 +203,6 @@ body {
     @apply w-full gap-5;
   }
 }
-
 @utility box_img {
   @apply relative
   flex flex-row
@@ -226,7 +225,6 @@ body {
     @apply h-48 w-4/5;
   }
 }
-
 
 @utility title {
   @apply text-center h-full w-full;
@@ -312,7 +310,7 @@ body {
 
 @utility dashboard {
   @apply relative
-  flex flex-col
+  flex flex-1 flex-col
   h-auto w-full gap-7 py-2
   justify-evenly
   items-center;

@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         const findUser = await db
             .select()
             .from(registeredApp)
-            .where(eq(registeredApp.userName, bodyParsed.userName))
+            .where(eq(registeredApp.user_name, bodyParsed.user_name))
             ;
 
         console.log("la lista di utenti trovati è: ", findUser);

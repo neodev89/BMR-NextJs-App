@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         const findUser = await db
             .select()
             .from(registeredApp)
-            .where(eq(registeredApp.userName, bodyParsed.userName))
+            .where(eq(registeredApp.user_name, bodyParsed.user_name))
             ;
 
         if (findUser[0]) {
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         }
 
         const token = jwt.sign(
-            { email: bodyParsed.userName },
+            { email: bodyParsed.user_name },
             firmToken,
             {
                 expiresIn: 60 * 60 * 24,
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
         const completeUser: insertRegisteredAppType = {
             ...bodyParsed,
             id: uuidv4(),
-            createdAt: new Date(),
+            created_at: new Date(),
             token: token,
         }
 

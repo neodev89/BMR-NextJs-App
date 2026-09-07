@@ -1,12 +1,14 @@
 'use client'
 
 import MenuIcon from '@mui/icons-material/Menu';
+import dynamic from 'next/dynamic';
 
 import { useListenWidth } from "@/src/hooks/useListenWidth";
 import { ReactNode, useState } from "react";
-import { Navbar } from "../components/navbar/Navbar";
-import { MobileNavbar } from "../components/navbar/MobileNavbar";
 import { IconButton } from '@mui/material';
+import { MobileNavbar } from '../components/navbar/MobileNavbar';
+import { Navbar } from '../components/navbar/Navbar';
+
 
 export default function GlobalWrapper({
     children
@@ -37,9 +39,9 @@ export default function GlobalWrapper({
             <div className="children">
                 {children}
             </div>
-            <div className="footer">
+            {/* <div className="footer">
                 Footer
-            </div>
+            </div> */}
         </div>
     )
 }

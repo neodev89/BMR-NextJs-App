@@ -10,7 +10,7 @@ const schema = {
 
 const pool = new Pool({
     host: process.env.SUPABASE_HOST!,
-    port: 6543,
+    port: 5432,
     user: process.env.SUPABASE_USER!,
     password: process.env.SUPABASE_DB_PASSWORD!,
     database: "postgres",

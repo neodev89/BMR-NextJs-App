@@ -15,10 +15,8 @@ import { useCustomDeleteMutation } from "@/src/tanstack/api/useDelete";
 import { useRouter } from "next/navigation";
 import { bmrSchema, bmrType, userBmrDbType } from "@/src/zod/userBmrSchema";
 import { useCustomMutation } from "@/src/tanstack/api/usePost";
+import GlobalWrapper from "@/src/ui/globalWrapper/GlobalWrapper";
 
-const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
-    ssr: false,
-});
 
 export default function DashboardComponent() {
     const defaultState = {
@@ -69,14 +67,21 @@ export default function DashboardComponent() {
         control,
     });
 
-    const hasInvalidFields = Object.values(values ?? {}).some(v => {
+    const hasInvalidFields = values ? Object.values(values).some(v => {
         const s = String(v).trim();
         // 1. Controlla se è vuoto
         if (s === "") return true;
         // 2. Controlla se NON è un numero valido (solo cifre, una virgola o un punto)
         const isValidNumber = /^[0-9]+([.,][0-9]+)?$/.test(s);
         return !isValidNumber;
-    });
+    }) : false;
+
+    // variante con every()
+    const areAllFieldsValid = values ? Object.values(values).every(v => {
+        const s = String(v).trim();
+        // Il campo è OK solo se NON è vuoto E se è un numero valido
+        return s !== "" && /^[0-9]+([.,][0-9]+)?$/.test(s);
+    }) : false;
 
     const handleCalculated = async () => {
         try {
@@ -139,7 +144,7 @@ export default function DashboardComponent() {
     ];
 
     return (
-        <LazyGlobalWrapper>
+        <GlobalWrapper>
             <div className="dashboard">
                 <div className="relative flex flex-row h-auto bg-transparent w-full">
                     <Button
@@ -220,7 +225,7 @@ export default function DashboardComponent() {
                                         <Button
                                             type="button"
                                             variant="outlined"
-                                            disabled={hasInvalidFields}
+                                            disabled={!areAllFieldsValid}
                                             sx={{
                                                 height: "2.5rem",
                                                 maxWidth: "80%",
@@ -295,6 +300,6 @@ export default function DashboardComponent() {
 
                 </div>
             </div>
-        </LazyGlobalWrapper>
+        </GlobalWrapper>
     )
 };

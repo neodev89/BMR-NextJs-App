@@ -74,14 +74,15 @@ export async function POST(req: Request) {
             );
         }
 
-        const { id, userName } = user[0];
+        const { token, user_name } = user[0];
 
         const userBmrReq: userBmrDbType = {
-            id: await getNextBmrId(),
-            createdAt: new Date().toISOString(),
-            userName,
+            order: await getNextBmrId(),
+            created_at: new Date().toISOString(),
+            user_name,
             ...parsedBody,
-            tokenUser: id,
+            token_user: token,
+            id: user.length + 1,
         }
 
         await db
@@ -169,7 +170,7 @@ export async function PUT(req: Request) {
         const userBmrToDb = await db
             .select()
             .from(userBmr)
-            .where(eq(userBmr.tokenUser, userToken))
+            .where(eq(userBmr.token_user, userToken))
             .limit(1);
 
         if (userBmrToDb.length === 0) {
@@ -240,7 +241,7 @@ export async function GET() {
         const user = await db
             .select()
             .from(userBmr)
-            .where(eq(userBmr.userName, mail));
+            .where(eq(userBmr.user_name, mail));
 
         if (user.length === 0) {
             const response: ApiResponse<[]> = {
@@ -283,7 +284,7 @@ export async function GET() {
 export async function DELETE(req: Request) {
     try {
         const body = await req.json();
-        const parsedBody = parseInt(body);
+        const parsedOrder = parseInt(body);
         const firmToken = process.env.FIRM_TOKEN!;
         const cookieStore = await cookies();
         const token = cookieStore.get("login-cookies")?.value;
@@ -315,10 +316,10 @@ export async function DELETE(req: Request) {
         const user = await db
             .select()
             .from(userBmr)
-            .where(eq(userBmr.userName, mail));
+            .where(eq(userBmr.user_name, mail));
 
         if (user.length === 0) {
-            
+
             return responseObjApi<null>({
                 success: false,
                 message: "Lista BMR vuota",
@@ -331,13 +332,13 @@ export async function DELETE(req: Request) {
             .query
             .userBmr
             .findFirst({
-                where: eq(userBmr.id, parsedBody),
+                where: eq(userBmr.order, parsedOrder),
             });
 
         if (!selectedBmrResult) {
             return responseObjApi<null>({
                 success: false,
-                message: "Nessun BMR salvato questo ID",
+                message: "Nessun BMR salvato questo Order",
                 data: null,
                 status: 404,
             });
@@ -345,8 +346,22 @@ export async function DELETE(req: Request) {
 
         const deletedRecord = await db
             .delete(userBmr)
-            .where(eq(userBmr.id, parsedBody))
+            .where(eq(userBmr.order, parsedOrder))
             .returning();
+
+        const remainingOrder = await db
+            .select()
+            .from(userBmr)
+            .where(eq(userBmr.user_name, mail));
+
+        for (const record of remainingOrder) {
+            if (record.order > parsedOrder) {
+                await db
+                    .update(userBmr)
+                    .set({ order: record.order - 1 })
+                    .where(eq(userBmr.id, record.id));
+            }
+        }
 
         return responseObjApi<userBmrDbType[]>({
             success: true,

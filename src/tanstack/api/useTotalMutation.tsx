@@ -1,33 +1,9 @@
 'use client'
 
 import instance from "@/src/axios/instance";
-import { ApiResponse } from "@/src/@types/ApiResponse";
-import { NetworkMode, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Method } from "axios";
-
-interface MutationProps<T> {
-    url: string;
-    retry?: number;
-    body?: T;
-    method?: Method;
-    invalidateKeys?: string[];
-    pathSuccess?: string;
-    pathErrorCredential?: string;
-    pathError?: string;
-}
-
-export interface ResponseApiClient<K> {
-    status: number;
-    res: ApiResponse<K>;
-}
-
-export interface hookProps {
-    mutationKey: string[];
-    retry?: number;
-    networkMode?: NetworkMode | undefined;
-    gcTime?: number;
-    description?: string;
-}
+import { hookProps, MutationProps } from "@/src/@types/mutationType";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ResponseApiClient } from "./usePost";
 
 export function useTotalCustomMutation<T, K>({ mutationKey, ...other }: hookProps) {
     const queryClient = useQueryClient();
@@ -45,7 +21,7 @@ export function useTotalCustomMutation<T, K>({ mutationKey, ...other }: hookProp
             res: res.data,
         } satisfies ResponseApiClient<K>;
 
-        console.log("Client response:", result);
+        // console.log("Client response:", result);
         return result;
     };
 

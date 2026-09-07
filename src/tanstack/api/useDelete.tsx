@@ -1,10 +1,10 @@
 'use client'
 
-import { ApiResponse } from "@/src/@types/ApiResponse";
 import instance from "@/src/axios/instance";
+import { ApiResponse } from "@/src/@types/ApiResponse";
+import { hookProps } from "@/src/@types/mutationType";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Method } from "axios";
-import { hookProps } from "./useTotalMutation";
 
 interface mutationProps<T> {
     url: string;

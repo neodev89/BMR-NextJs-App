@@ -60,7 +60,7 @@ export async function PUT(req: Request) {
         const userDb = await db
             .select()
             .from(registeredApp)
-            .where(eq(registeredApp.userName, userName));
+            .where(eq(registeredApp.user_name, userName));
 
         if (userDb.length === 0) {
             return responseObjApi<undefined>({
@@ -72,10 +72,10 @@ export async function PUT(req: Request) {
         }
 
         const newToken = jwt.sign(
-            { email: userDb[0].userName },
+            { email: userDb[0].user_name },
             firmToken,
             {
-                expiresIn: 60 * 60 * 24,
+                expiresIn: 60 * 60 * 24 * 10,
             }
         );
         console.log("Il token generato è: ", newToken);
@@ -109,7 +109,7 @@ export async function PUT(req: Request) {
                 ...registeredApp,
                 token: cookiesValue,
             })
-            .where(eq(registeredApp.userName, userName));
+            .where(eq(registeredApp.user_name, userName));
 
         return responseObjApi<string>({
             success: true,

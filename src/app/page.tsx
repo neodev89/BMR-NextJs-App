@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import HomeComponent from "./HomeComponent";
+import Script from "next/script";
 
 
 const dominio = process.env.NEXT_PUBLIC_DOMAIN ?? "http://localhost:3000";
@@ -70,9 +71,13 @@ export default async function Home() {
 
   return (
     <>
-      <script dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schemaHome)
-      }} />
+      <Script
+        id="schema-home"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(schemaHome)
+        }}
+      />
       <HomeComponent />
     </>
   );

@@ -3,15 +3,16 @@ import { registeredApp } from "./registered";
 
 export const userBmr = pgTable("user_value_bmr_table", {
     id: numeric("id", { mode: 'number' }).primaryKey(),
-    createdAt: text("created_at").notNull(),
-    userName: text("user_name").notNull(),
+    created_at: text("created_at").notNull(),
+    user_name: text("user_name").notNull(),
     weight: text("weight").notNull(),
     height: text("height").notNull(),
     age: text("age").notNull(),
     activity: text("activity").notNull(),
     bmr: text("bmr").notNull(),
     gender: text("gender"),
-    tokenUser: text("token_user").notNull().references(
+    token_user: text("token_user").notNull().references(
         () => registeredApp.id
-    )
+    ),
+    order: numeric({ mode: "number" }).default(-1).notNull(),
 });
