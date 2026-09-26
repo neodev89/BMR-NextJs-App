@@ -1,5 +1,7 @@
-import { Metadata } from "next";
 import AccountComponent from "./AccountComponent";
+import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 const dominio = process.env.NEXT_PUBLIC_DOMAIN ?? "https://localhost:3000";
 
@@ -70,6 +72,10 @@ const schemaAccount = {
 };
 
 export default async function Account() {
+
+    const token = (await cookies()).get("login-cookies")?.value;
+
+    if (!token) redirect("/")
     return (
         <>
             <script type="application/ld+json" dangerouslySetInnerHTML={{

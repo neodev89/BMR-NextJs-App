@@ -2,9 +2,7 @@
 
 import "@/src/app/globals.css";
 import CustomInput from "@/src/ui/components/CustomInput";
-import dynamic from "next/dynamic";
 
-import { signIn } from "next-auth/react";
 import { Path, useForm, useWatch } from "react-hook-form";
 import { loginSchema, loginSchemaType } from "@/src/zod/controlLogin";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,8 +11,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { selectRegisteredAppType } from "@/src/db/schema/registered";
 import { useTotalCustomMutation } from "@/src/tanstack/api/useTotalMutation";
-import GlobalWrapper from "@/src/ui/globalWrapper/GlobalWrapper";
+import dynamic from "next/dynamic";
 
+const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
+    ssr: false,
+});
 
 export default function LoginComponent() {
     const { control, reset, setValue, handleSubmit } = useForm<loginSchemaType>({
@@ -169,7 +170,7 @@ export default function LoginComponent() {
     // vecchio token ponzio: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBvbnppb0BwaWxhdG8uaXQiLCJpYXQiOjE3NzkyMDU4MjAsImV4cCI6MTc3OTI5MjIyMH0.cmc634zpgIVwzfj02KvBnKzieVjgu3oQmHGqX4wnl00
 
     return (
-        <GlobalWrapper>
+        <LazyGlobalWrapper>
             {
                 loadingApi ? (
                     <CircularProgress />
@@ -177,11 +178,11 @@ export default function LoginComponent() {
                     <>
                         {
                             (login.isPending) ? (
-                                <div className="relative flex flex-row w-full justify-center items-center">
+                                <div className="relative flex flex-row flex-1 min-h-full w-full justify-center items-center">
                                     <CircularProgress size={50} />
                                 </div>
                             ) : (
-                                <div className="relative flex flex-1 h-full w-full">
+                                <div className="relative flex flex-1 min-h-full w-full">
                                     {
                                         login.isError ? (
                                             <Typography variant="h3" color="error">
@@ -244,7 +245,7 @@ export default function LoginComponent() {
                                                                 <Button
                                                                     type="button"
                                                                     onClick={handleResetFieldAndBack}
-                                                                    sx={{ height: "3.5rem", width: "11rem", border: "1px solid #7f22fe", color: "7f22fe" }}
+                                                                    sx={{ height: "3.5rem", width: "11rem", border: "1px solid #7f22fe", color: "a260ff" }}
                                                                 >
                                                                     Cancella campi
                                                                 </Button>
@@ -268,7 +269,7 @@ export default function LoginComponent() {
                                                                     onClick={handleResetField}
                                                                     sx={{ height: "3.5rem", width: "11rem", border: "1px solid #7f22fe", color: "#7f22fe" }}
                                                                 >
-                                                                    Cancella campi
+                                                                    <span className="text-base font-bold">Cancella campi</span>
                                                                 </Button>
                                                                 <Button
                                                                     type="submit"
@@ -291,6 +292,6 @@ export default function LoginComponent() {
                     </>
                 )
             }
-        </GlobalWrapper>
+        </LazyGlobalWrapper>
     )
 }

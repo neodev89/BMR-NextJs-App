@@ -6,6 +6,7 @@ import { db } from "@/src/db";
 import { registeredApp } from "@/src/db/schema/registered";
 import { eq } from "drizzle-orm";
 import { responseObjApi } from "@/src/middleware/responseObjApi";
+import { userBmr } from "@/src/db/schema/userBmr";
 
 export async function GET() {
     try {
@@ -62,7 +63,12 @@ export async function PUT(req: Request) {
             .from(registeredApp)
             .where(eq(registeredApp.user_name, userName));
 
-        if (userDb.length === 0) {
+        const userValDb = await db
+            .select()
+            .from(userBmr)
+            .where(eq(userBmr.user_name, userName));
+
+        if (userDb.length === 0 && userValDb.length === 0) {
             return responseObjApi<undefined>({
                 success: false,
                 message: "Nessun token associato nella lista utenti",
@@ -111,9 +117,17 @@ export async function PUT(req: Request) {
             })
             .where(eq(registeredApp.user_name, userName));
 
+        await db
+            .update(userBmr)
+            .set({
+                ...userBmr,
+                token_user: cookiesValue,
+            })
+            .where(eq(userBmr.user_name, userName));
+
         return responseObjApi<string>({
             success: true,
-            message: "Token nuovo validato",
+            message: "Token nuovo validato e aggiornato in entrambe le tabelle!",
             data: cookiesValue!,
             status: 200,
         });
@@ -133,6 +147,17 @@ export async function PUT(req: Request) {
 export async function DELETE() {
     try {
         const cookieStore = await cookies();
+        const userCookie = cookieStore.get("login-cookies")?.value;
+
+        if (!userCookie) {
+            return responseObjApi<undefined>({
+                success: false,
+                message: "Token non presente",
+                data: undefined,
+                status: 404,
+            });
+        }
+
         cookieStore.delete("login-cookies");
         const response: ApiResponse<undefined> = {
             success: true,

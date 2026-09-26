@@ -85,9 +85,9 @@ body {
   --height-image-home: 30rem;
 
   /* Cards */
-  --height-cards-lg: 35rem;
+  --height-cards-lg: 32rem;
   --width-cards-lg: 20rem;
-  --height-cards-md: 32rem;
+  --height-cards-md: 30rem;
   --width-cards-md: 22rem;
   --height-cards-xs: 30rem;
 
@@ -104,10 +104,10 @@ body {
 /* Global Wrapper*/
 @utility wrapper {
   @apply relative flex flex-col
-  justify-start py-1
+  justify-center py-1
   min-h-dvh min-w-full 
   overflow-y-auto overflow-x-hidden 
-  bg-black border;
+  bg-black;
 }
 
 @utility navbar {
@@ -167,19 +167,8 @@ body {
 
 @utility children {
   @apply relative
-  flex flex-row
-  w-full h-auto
-  bg-black;
-
-  @media (min-width: 320px) {
-    @apply min-h-52;
-  }
-  @media (min-width: 768px) {
-    @apply min-h-48;
-  }
-  @media (min-width: 1024px) {
-    @apply min-h-80;
-  }
+  flex flex-row h-11/12
+  bg-black min-h-full;
 }
 
 @utility footer {
@@ -206,12 +195,12 @@ body {
 @utility box_img {
   @apply relative
   flex flex-row
-  h-(--height-image-home) w-full
+  h-2/5 w-full
   justify-center items-center;
 }
 
 @utility box_title {
-  @apply relative flex;
+  @apply relative flex h-2/5 w-full;
 
   @media (min-width: 320px) {
     @apply h-32 w-5/6;
@@ -311,7 +300,7 @@ body {
 @utility dashboard {
   @apply relative
   flex flex-1 flex-col
-  h-auto w-full gap-7 py-2
+  w-full h-max gap-7 py-2
   justify-evenly
   items-center;
   background: var(--gradient-violet);

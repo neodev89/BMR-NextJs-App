@@ -27,7 +27,7 @@ export default function HomeComponent() {
                 <div className="box_title">
                     <h1 className="title">LA TUA APP PER MONITORARE IL TUO BMR E IL TUO TDEE</h1>
                 </div>
-                <div className="relative flex flex-row h-1/2 w-full justify-center items-center">
+                <div className="relative flex flex-row h-1/5 w-full justify-center items-center">
                     <div className="relative flex flex-row">
                         <p className="paragraph">
                             Esegui il <Link href={'/login'}><u className="routes-hover">Login</u></Link> per utilizzare l&apos;App!

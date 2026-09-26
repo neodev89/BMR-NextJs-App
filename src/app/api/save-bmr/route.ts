@@ -23,6 +23,7 @@ async function getNextBmrId() {
 
 export async function POST(req: Request) {
     try {
+        let lastID: number = 0;
         const body = await req.json();
         const parsedBody = await bmrSchema.parseAsync(body);
         if (!parsedBody) {
@@ -74,6 +75,17 @@ export async function POST(req: Request) {
             );
         }
 
+        const userValue = await db
+            .select()
+            .from(userBmr)
+            .where(eq(userBmr.token_user, user[0].token))
+
+        if (userValue.length === 0) {
+            lastID = 0;
+        }
+
+        lastID = userValue[userValue.length - 1].id;
+
         const { token, user_name } = user[0];
 
         const userBmrReq: userBmrDbType = {
@@ -82,7 +94,7 @@ export async function POST(req: Request) {
             user_name,
             ...parsedBody,
             token_user: token,
-            id: user.length + 1,
+            id: lastID + 1,
         }
 
         await db

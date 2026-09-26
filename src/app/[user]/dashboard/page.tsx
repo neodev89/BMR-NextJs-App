@@ -1,5 +1,7 @@
 import DashboardComponent from "./DashboardComponent";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 const dominio = process.env.NEXT_PUBLIC_DOMAIN ?? "https://localhost:3000";
 export async function generateMetadata(): Promise<Metadata> {
@@ -87,12 +89,17 @@ const schemaDashboard = {
     ]
 };
 
+
 export default async function Dashboard() {
+    const token = (await cookies()).get("login-cookies")?.value;
+
+    if (!token) redirect("/")
     return (
         <>
             <script type="application/ld+json" dangerouslySetInnerHTML={{
                 __html: JSON.stringify(schemaDashboard)
             }} />
+
             <DashboardComponent />
         </>
     )

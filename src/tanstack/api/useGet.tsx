@@ -106,7 +106,7 @@ export function useGetParsedZod<TSchema extends ZodType = ZodType>({
         gcTime,
 
         meta: {
-            description: "GET request with full control",
+            description: "GET request with full Zod control",
         },
     });
 };

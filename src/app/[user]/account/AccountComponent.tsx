@@ -8,11 +8,13 @@ import { userBmrDbType } from "@/src/zod/userBmrSchema";
 import { usePathname } from "next/navigation";
 import { CircularProgress, IconButton, Typography } from "@mui/material";
 import { useCustomDeleteMutation } from "@/src/tanstack/api/useDelete";
-import { StatisticUserSchema } from "@/src/zod/StatisticUser";
+import { StatisticUserSchema, StatisticUserTypes } from "@/src/zod/StatisticUser";
+import { usePostBlob } from "@/src/tanstack/api/usePostBlob";
+import { tokenApiResponse } from "@/src/@types/ApiResponse";
 
 
 const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
-    ssr: true
+   ssr: false
 });
 
 const formatDate = (date: string) => {
@@ -36,6 +38,12 @@ export default function AccountComponent() {
     const rawSlug = pathname.split("/")[1];
     const slug = decodeURIComponent(rawSlug); // <-- FIX
     const goBack = `/${slug}/dashboard`;
+
+    const {data: token, isLoading: loadTk } = useGet<tokenApiResponse>({
+        key: ["get-cookies"],
+        url: "/api/cookies"
+    });
+    console.log(token);
 
     const { data: bmrData, isLoading: loadingBmr } = useGet<userBmrDbType[]>({
         key: ["get-data-bmr-user"],
@@ -100,11 +108,40 @@ export default function AccountComponent() {
         return replacedValue.toFixed(2).replace(".", ",");
     };
 
+    const generatePdf = usePostBlob<StatisticUserTypes>(["pdf-stat"]);
+
+    const handleGeneratePdf = async () => {
+        try {
+            if (statisticUserParsed.data) {
+                await generatePdf.mutateAsync({
+                    url: "stat-pdf",
+                    body: statisticUserParsed.data.data
+                }, {
+                    onSuccess: (blob) => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "statistiche_bmr.pdf";
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    },
+                })
+            }
+            console.log("I dati non sono ancora presenti")
+            return null;
+        } catch (error) {
+            console.log("Errore nella chiamata API", error);
+        }
+    };
+
     return (
         <LazyGlobalWrapper>
             <div className="dashboard">
-                <div className="relative flex flex-row h-auto w-full">
+                <div className="relative flex flex-row justify-between px-2 h-auto w-full">
                     <Link href={`${goBack}`} className="links links-hover">Back</Link>
+                    {
+                        statisticUserParsed.data && <button type="button" onClick={handleGeneratePdf} className="links links-hover">Genera PDF</button>
+                    }
                 </div>
                 <div className="relative flex flex-row h-full w-full justify-evenly items-center">
                     <div className="cards gradient-border">
@@ -116,57 +153,6 @@ export default function AccountComponent() {
                             </div>
                             <div className="body_cards2">
                                 <div className="relative flex flex-col max-h-82 overflow-y-auto gap-2">
-                                    {bmrData?.data !== undefined ?
-                                        (
-                                            bmrData?.data.map((el) => {
-                                                const newDate = formatDate(el.created_at);
-
-                                                return (
-                                                    <div
-                                                        key={el.id} // meglio un id univoco che l’indice
-                                                        className="border-b border-base-300 pb-2 last:border-none"
-                                                    >
-                                                        <div className="flex flex-row justify-between w-full h-10">
-                                                            <p>Altezza:</p>
-                                                            <p>{el.height} cm</p>
-                                                        </div>
-                                                        <div className="flex flex-row justify-between w-full h-10">
-                                                            <p>Peso:</p>
-                                                            <p>{el.weight} kg</p>
-                                                        </div>
-                                                        <div className="flex flex-row justify-between w-full h-10">
-                                                            <p>Età:</p>
-                                                            <p>{el.age}</p>
-                                                        </div>
-                                                        <div className="flex flex-row justify-between w-full h-10">
-                                                            <p>Stile di vita:</p>
-                                                            <p>{el.activity}</p>
-                                                        </div>
-                                                        <div className="flex flex-row justify-between w-full h-10">
-                                                            <p>Sesso:</p>
-                                                            <p>{el.gender}</p>
-                                                        </div>
-                                                        <div className="flex flex-row justify-between w-full h-10">
-                                                            <p>BMR:</p>
-                                                            <p>{el.bmr}</p>
-                                                        </div>
-                                                        <div className="flex flex-row justify-between w-full h-10">
-                                                            <p>In data:</p>
-                                                            <p>{newDate}</p>
-                                                        </div>
-                                                        <div className="flex flex-row justify-between w-full h-10">
-                                                            <IconButton onClick={() => handleDeleteRecord(el.order)}>
-                                                                <CloseIcon color="error" fontSize="large" />
-                                                            </IconButton>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })
-                                        ) : (
-                                            <>
-                                                <p>Nessun dato salvato</p>
-                                            </>
-                                        )}
                                     {
                                         loadingBmr ? (
                                             <Typography component={'span'}>
@@ -174,9 +160,62 @@ export default function AccountComponent() {
                                                 Dati in caricamento...
                                             </Typography>
                                         ) : (
-                                            <p>Nessun dato trovato</p>
+                                            <>
+                                                {bmrData?.data !== undefined ?
+                                                    (
+                                                        bmrData?.data.map((el) => {
+                                                            const newDate = formatDate(el.created_at);
+
+                                                            return (
+                                                                <div
+                                                                    key={el.id} // meglio un id univoco che l’indice
+                                                                    className="border-b border-base-300 pb-2 last:border-none"
+                                                                >
+                                                                    <div className="flex flex-row justify-between w-full h-10">
+                                                                        <p>Altezza:</p>
+                                                                        <p>{el.height} cm</p>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between w-full h-10">
+                                                                        <p>Peso:</p>
+                                                                        <p>{el.weight} kg</p>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between w-full h-10">
+                                                                        <p>Età:</p>
+                                                                        <p>{el.age}</p>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between w-full h-10">
+                                                                        <p>Stile di vita:</p>
+                                                                        <p>{el.activity}</p>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between w-full h-10">
+                                                                        <p>Sesso:</p>
+                                                                        <p>{el.gender}</p>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between w-full h-10">
+                                                                        <p>BMR:</p>
+                                                                        <p>{el.bmr}</p>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between w-full h-10">
+                                                                        <p>In data:</p>
+                                                                        <p>{newDate}</p>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between w-full h-10">
+                                                                        <IconButton onClick={() => handleDeleteRecord(el.order)}>
+                                                                            <CloseIcon color="error" fontSize="large" />
+                                                                        </IconButton>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })
+                                                    ) : (
+                                                        <>
+                                                            <p>Nessun dato salvato</p>
+                                                        </>
+                                                    )}
+                                            </>
                                         )
                                     }
+
                                 </div>
                             </div>
 
@@ -233,7 +272,7 @@ export default function AccountComponent() {
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
                                                                                         <div className="grid col-1 row-1 w-full"><p>Peso medio:</p></div>
                                                                                         <div className="grid col-2 row-1 h-auto w-full justify-end">
-                                                                                            <p>{roundedValue(statisticUserParsed.data.data.average_weight)}</p>
+                                                                                            <p>{floatingValue(statisticUserParsed.data.data.average_weight)}</p>
                                                                                         </div>
                                                                                     </div>
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
@@ -312,11 +351,7 @@ export default function AccountComponent() {
                                                                                         <div className="grid col-1 row-1 w-full"><p>N. dati salvati:</p></div>
                                                                                         <div className="grid col-2 row-1 h-auto w-full justify-end">
                                                                                             <p>
-                                                                                                {
-                                                                                                    statisticUserParsed.data.data.list_order.map((i, idx) => (
-                                                                                                        <span key={idx}>{`${i} | `}</span>
-                                                                                                    ))
-                                                                                                }
+                                                                                                {statisticUserParsed.data.data.list_order.length}
                                                                                             </p>
                                                                                         </div>
                                                                                     </div>

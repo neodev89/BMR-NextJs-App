@@ -146,7 +146,7 @@ export default function DashboardComponent() {
     return (
         <GlobalWrapper>
             <div className="dashboard">
-                <div className="relative flex flex-row h-auto bg-transparent w-full">
+                <div className="relative flex flex-row h-max bg-transparent w-full">
                     <Button
                         type="button"
                         variant="contained"
@@ -157,7 +157,7 @@ export default function DashboardComponent() {
                             backgroundColor: "#7f22fe",
                         }}
                     >
-                        Esci
+                        Indietro
                     </Button>
                 </div>
                 <div className="bmr">
