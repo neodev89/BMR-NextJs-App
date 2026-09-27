@@ -279,7 +279,6 @@ export default function DashboardComponent() {
                             </div>
                         </div>
                     </div>
-
                 </div>
                 <div>
                     <Snackbar

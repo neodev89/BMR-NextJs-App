@@ -103,10 +103,10 @@ body {
 
 /* Global Wrapper*/
 @utility wrapper {
-  @apply relative flex flex-col
-  justify-center py-1
-  min-h-dvh min-w-full 
-  overflow-y-auto overflow-x-hidden 
+  @apply relative flex flex-col gap-2
+  justify-center
+  h-dvh min-w-full 
+  overflow-hidden 
   bg-black;
 }
 
@@ -168,7 +168,8 @@ body {
 @utility children {
   @apply relative
   flex flex-row h-11/12
-  bg-black min-h-full;
+  overflow-hidden
+  bg-black;
 }
 
 @utility footer {
@@ -300,25 +301,29 @@ body {
 @utility dashboard {
   @apply relative
   flex flex-1 flex-col
-  w-full h-max gap-7 py-2
+  w-full h-full gap-3 py-2
   justify-evenly
   items-center;
   background: var(--gradient-violet);
 }
 
 @utility bmr {
-  @apply relative
-  h-full w-full
-  flex items-center overflow-hidden;
+  @apply relative flex flex-wrap w-full gap-5 p-5;
+  
+  /* Usa h-dvh o max-h-dvh invece di min-h-dvh per definire il limite di overflow */
+  max-height: 100dvh;
+  @apply overflow-y-auto overflow-x-hidden;
 
   @media (min-width: 320px) {
-    @apply flex-col items-center gap-5 p-5;
+    /* items-start evita che gli elementi vengano spinti sopra il bordo superiore */
+    @apply flex-col items-center justify-start gap-5 p-5;
   }
   @media (min-width: 768px) {
-    @apply flex-col items-center gap-6 p-5;
+    @apply flex-col items-center justify-start gap-6 p-5;
   }
   @media (min-width: 1024px) {
-    @apply flex-row flex-wrap justify-evenly items-center gap-7 p-5;
+    /* Su desktop usiamo justify-center/evenly e items-start per l'asse verticale */
+    @apply flex-row flex-wrap justify-evenly items-start gap-7 p-5;
   }
 }
 
