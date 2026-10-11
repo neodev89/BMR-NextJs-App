@@ -93,6 +93,7 @@ export default function AccountComponent() {
         gcTime: 60 * 60 * 20,
         schema: StatisticUserSchema
     });
+
     console.log("RAW PYTHON RESPONSE:", statisticUserParsed.data);
 
     console.log("La mail dell'utente è presente? ", emailUser ?? "No");
@@ -103,10 +104,14 @@ export default function AccountComponent() {
     //     return Math.round(parseFloat(replacedVal)).toString();
     // };
 
-    // const floatingValue = (value: string): string => {
-    //     const replacedValue = parseFloat(value);
-    //     return replacedValue.toFixed(2).replace(".", ",");
-    // };
+    const floatingValue = (value: number | string): string => {
+        const replacedValue = typeof value === "string" ? value : String(value);
+        const splittedValue = replacedValue.split(".");
+        if (splittedValue[1] === "00") {
+            return String(splittedValue[0]);
+        }
+        return replacedValue.replace(".", ",");
+    };
 
     const generatePdf = usePostBlob<StatisticUserTypes>(["pdf-stat"]);
 
@@ -193,7 +198,7 @@ export default function AccountComponent() {
                                                                     </div>
                                                                     <div className="flex flex-row justify-between w-full h-10">
                                                                         <p>BMR:</p>
-                                                                        <p>{el.bmr}</p>
+                                                                        <p>{floatingValue(el.bmr)}</p>
                                                                     </div>
                                                                     <div className="flex flex-row justify-between w-full h-10">
                                                                         <p>In data:</p>
@@ -266,19 +271,19 @@ export default function AccountComponent() {
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
                                                                                         <div className="grid col-1 row-1 w-full"><p>Bmr medio:</p></div>
                                                                                         <div className="grid col-2 row-1 h-auto w-full justify-end">
-                                                                                            <p>{statisticUserParsed.data.data.average_bmr}</p>
+                                                                                            <p>{floatingValue(statisticUserParsed.data.data.average_bmr)}</p>
                                                                                         </div>
                                                                                     </div>
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
                                                                                         <div className="grid col-1 row-1 w-full"><p>Peso medio:</p></div>
                                                                                         <div className="grid col-2 row-1 h-auto w-full justify-end">
-                                                                                            <p>{statisticUserParsed.data.data.average_weight}</p>
+                                                                                            <p>{floatingValue(statisticUserParsed.data.data.average_weight)}</p>
                                                                                         </div>
                                                                                     </div>
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
                                                                                         <div className="grid col-1 row-1 w-full"><p>Altezza media:</p></div>
                                                                                         <div className="grid col-2 row-1 h-auto w-full justify-end">
-                                                                                            <p>{statisticUserParsed.data.data.average_height}</p>
+                                                                                            <p>{floatingValue(statisticUserParsed.data.data.average_height)}</p>
                                                                                         </div>
                                                                                     </div>
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
@@ -293,7 +298,7 @@ export default function AccountComponent() {
                                                                                             <p>
                                                                                                 {
                                                                                                     statisticUserParsed.data.data.list_weight.map((i, idx) => (
-                                                                                                        <span key={idx}>{`${(i)} | `}</span>
+                                                                                                        <span key={idx}>{`${floatingValue(i)} | `}</span>
                                                                                                     ))
                                                                                                 }
                                                                                             </p>
@@ -305,7 +310,7 @@ export default function AccountComponent() {
                                                                                             <p>
                                                                                                 {
                                                                                                     statisticUserParsed.data.data.list_height.map((i, idx) => (
-                                                                                                        <span key={idx}>{`${(i)} | `}</span>
+                                                                                                        <span key={idx}>{`${floatingValue(i)} | `}</span>
                                                                                                     ))
                                                                                                 }
                                                                                             </p>
@@ -329,7 +334,7 @@ export default function AccountComponent() {
                                                                                             <p>
                                                                                                 {
                                                                                                     statisticUserParsed.data.data.list_bmr.map((i, idx) => (
-                                                                                                        <span key={idx}>{`${(i)} | `}</span>
+                                                                                                        <span key={idx}>{`${floatingValue(i)} | `}</span>
                                                                                                     ))
                                                                                                 }
                                                                                             </p>

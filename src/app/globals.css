@@ -262,7 +262,7 @@ body {
   bg-violet-600
   text-white
   font-bold
-  h-10 w-30;
+  h-10 min-w-30 max-w-4/5 cursor-pointer;
 }
 
 @utility links-hover {
@@ -293,9 +293,22 @@ body {
   p-4;
 }
 
+@utility form_row {
+  @apply flex flex-row 
+  max-h-full w-full justify-evenly
+  items-center gap-x-2
+  border border-violet-600 rounded-2xl 
+  p-4;
+}
+
 @utility inner_form {
   @apply relative flex flex-col 
   w-full h-auto gap-3 py-2 px-1;
+}
+
+@utility fields {
+  @apply flex pl-1 border border-black rounded-2xl
+  h-12 w-58;
 }
 
 @utility dashboard {

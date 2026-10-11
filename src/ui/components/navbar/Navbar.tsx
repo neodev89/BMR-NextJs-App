@@ -75,7 +75,7 @@ export const Navbar = () => {
                             Account
                         </Link>
                         <Link href={`${replacedYourData}`} className="links links-hover">
-                            I tuoi Valori
+                            Pasti
                         </Link>
                     </>
                 )}

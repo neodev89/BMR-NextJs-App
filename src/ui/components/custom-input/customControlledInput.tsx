@@ -8,8 +8,20 @@ export const ControlledInput = <T extends object>({
         <Controller
             control={control}
             name={name}
-            render={({ field }) => (
-                <input type={type} value={String(values)} onChange={field.onChange} />
+            render={({ field, fieldState }) => (
+                <>
+                    {fieldState.error ? (
+                        <p>{fieldState.error.message}</p>
+                    ) : (
+                        <input 
+                            type={type} 
+                            value={field.value ?? String(values)} 
+                            onChange={field.onChange} 
+                            className="fields" 
+                            placeholder={typeof field.value === "string" ? name : undefined}
+                        />
+                    )}
+                </>
             )}
         />
     )
