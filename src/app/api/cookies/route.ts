@@ -7,6 +7,7 @@ import { registeredApp } from "@/src/db/schema/registered";
 import { eq } from "drizzle-orm";
 import { responseObjApi } from "@/src/middleware/responseObjApi";
 import { userBmr } from "@/src/db/schema/userBmr";
+import { statisticUserApp } from "@/src/db/schema/statisticUser";
 
 export async function GET() {
     try {
@@ -68,7 +69,12 @@ export async function PUT(req: Request) {
             .from(userBmr)
             .where(eq(userBmr.user_name, userName));
 
-        if (userDb.length === 0 && userValDb.length === 0) {
+        const statisticUserValue = await db
+            .select()
+            .from(statisticUserApp)
+            .where(eq(statisticUserApp.email, userName))
+
+        if (userDb.length === 0 && userValDb.length === 0 && statisticUserValue.length === 0) {
             return responseObjApi<undefined>({
                 success: false,
                 message: "Nessun token associato nella lista utenti",
@@ -124,6 +130,14 @@ export async function PUT(req: Request) {
                 token_user: cookiesValue,
             })
             .where(eq(userBmr.user_name, userName));
+
+        await db
+            .update(statisticUserApp)
+            .set({
+                ...statisticUserApp,
+                token: cookiesValue,
+            })
+            .where(eq(statisticUserApp.email, userName));
 
         return responseObjApi<string>({
             success: true,

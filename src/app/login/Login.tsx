@@ -3,7 +3,7 @@
 import "@/src/app/globals.css";
 import CustomInput from "@/src/ui/components/CustomInput";
 
-import { Path, useForm, useWatch } from "react-hook-form";
+import { Path, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { loginSchema, loginSchemaType } from "@/src/zod/controlLogin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
@@ -70,19 +70,7 @@ export default function LoginComponent() {
         setValue(name, "");
     };
 
-    // const handleSubmitForm = (data: loginSchemaType) => {
-    //     const cleaned = data.name.replace(/\s+/g, "");
-    //     const origin = window.location.origin;
-
-    //     signIn("credentials", {
-    //         email: data.user_name,
-    //         password: data.password,
-    //         redirect: true,
-    //         redirectTo: `${origin}/${cleaned}/dashboard`,
-    //     });
-    // }
-
-    const handleSubmitFormApi = async (data: loginSchemaType) => {
+    const handleSubmitFormApi: SubmitHandler<loginSchemaType> = async (data) => {
         try {
             const result = await login.mutateAsync({
                 url: "/api/login",
@@ -108,19 +96,13 @@ export default function LoginComponent() {
                 setIsRegister(true);
             }
 
-            // if (result.res) {
-            //     console.log("Il result della API è: ", result.res);
-            //     // output: {success: true, message: 'Il login è stato effettuato', data: {…}, status: 200}
-            // } else {
-            //     console.log(result);
-            // }
         } catch (error: unknown) {
             const mxg = error instanceof Error ? error.message : error;
             console.log("Errore nella chiamata API ", mxg);
         }
     }
 
-    const handleSubmitRegister = async (data: loginSchemaType) => {
+    const handleSubmitRegister: SubmitHandler<loginSchemaType> = async (data) => {
         try {
             const result = await login.mutateAsync({
                 url: "/api/register",

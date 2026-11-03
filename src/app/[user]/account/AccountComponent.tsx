@@ -86,10 +86,10 @@ export default function AccountComponent() {
         body: { email: bmrData?.data?.[0]?.user_name },
 
         // 3. ENABLED Semplificato: la query parte SOLO se emailUser NON è vuota!
-        enabled: Boolean(emailUser && emailUser.trim().length > 0) && emailUser !== "" && emailUser !== undefined,
+        enabled: loadTk ? false : true,
 
         staleTime: 0,
-        retry: 2,
+        retry: 4,
         gcTime: 60 * 60 * 20,
         schema: StatisticUserSchema
     });
@@ -98,11 +98,6 @@ export default function AccountComponent() {
 
     console.log("La mail dell'utente è presente? ", emailUser ?? "No");
     console.log("Chissà se i dati Python sono stati chiamati: ", statisticUserParsed.data?.data); // output positivo
-
-    // const roundedValue = (val: string): string => {
-    //     const replacedVal = val.replace(".", ",");
-    //     return Math.round(parseFloat(replacedVal)).toString();
-    // };
 
     const floatingValue = (value: number | string): string => {
         const replacedValue = typeof value === "string" ? value : String(value);

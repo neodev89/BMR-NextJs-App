@@ -1,7 +1,6 @@
 'use client'
 
 import MenuIcon from '@mui/icons-material/Menu';
-import dynamic from 'next/dynamic';
 
 import { useListenWidth } from "@/src/hooks/useListenWidth";
 import { ReactNode, useState } from "react";

@@ -14,11 +14,13 @@ export const Navbar = () => {
     // output in dashboard: /[user]/dashboard 
     // console.log("PATHNAME: ", pathname); // /[user]/route
     const splittedPathname = pathname.split("/");
-    // console.log("PATHNAME splittato: ", splittedPathname);
+    console.log("PATHNAME splittato: ", splittedPathname);
     // output: ["", "[user]", "route"]
     const replaceAccountPath = pathname.replace(`${splittedPathname[2]}`, "/account");
-    const replacedYourData = pathname.replace(`${splittedPathname[2]}`, "/your-data");
-
+    const replacedYourData = pathname.replace(`${splittedPathname[2]}`, "/foods");
+    const replacedTableStatistic = pathname.replace(`${splittedPathname[2]}`, "/statistics");
+    console.log(replacedTableStatistic);
+    
     const escapeUser = useCustomDeleteMutation({
         mutationKey: ["escape-user"]
     });
@@ -76,6 +78,9 @@ export const Navbar = () => {
                         </Link>
                         <Link href={`${replacedYourData}`} className="links links-hover">
                             Pasti
+                        </Link>
+                        <Link href={`${replacedTableStatistic}`} className="links links-hover">
+                            Tabella
                         </Link>
                     </>
                 )}

@@ -2,10 +2,12 @@ import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { registeredApp } from "@/src/db/schema/registered"
 import { userBmr } from "./schema/userBmr";
+import { statisticUserApp } from "./schema/statisticUser";
 
 const schema = {
     registeredApp,
     userBmr,
+    statisticUserApp
 }
 
 const pool = new Pool({

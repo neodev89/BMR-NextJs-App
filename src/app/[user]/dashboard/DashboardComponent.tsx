@@ -1,6 +1,6 @@
 'use client'
 
-import dynamic from "next/dynamic";
+import GlobalWrapper from "@/src/ui/globalWrapper/GlobalWrapper";
 import BasicMenu from "@/src/ui/components/menu/Menu";
 import calcBmr from "@/src/formule/calcBmr";
 import CustomInput from "@/src/ui/components/CustomInput";
@@ -15,7 +15,6 @@ import { useCustomDeleteMutation } from "@/src/tanstack/api/useDelete";
 import { useRouter } from "next/navigation";
 import { bmrSchema, bmrType, userBmrDbType } from "@/src/zod/userBmrSchema";
 import { useCustomMutation } from "@/src/tanstack/api/usePost";
-import GlobalWrapper from "@/src/ui/globalWrapper/GlobalWrapper";
 
 
 export default function DashboardComponent() {
