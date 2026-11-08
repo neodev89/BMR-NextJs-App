@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 export const getCookies = async () => {
     const asyncGetCook = async () => {
         const res = await fetch(
-            "/api/cookies",
+            "cookies",
             {
                 headers: {
                     "Content-Type": "application/json"

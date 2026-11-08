@@ -32,7 +32,7 @@ export default function TableComponent() {
 
     const { data: tokenData, isLoading: loadTk } = useGet<tokenApiResponse>({
         key: ["get-cookies"],
-        url: "/api/cookies"
+        url: "cookies"
     });
     console.log(tokenData);
 
@@ -181,7 +181,7 @@ export default function TableComponent() {
                                                 {rowsStat ? formattaIsoConSplit(rowsStat.creations_date) : '-'}
                                             </td>
                                             <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.list_order.reduce((a, b) => a + b) : '0'}
+                                                {rowsStat ? (rowsStat.list_order.length === 1 ? 1 : rowsStat.list_order.reduce((a, b) => a + b)) : '0'}
                                             </td>
                                         </tr>
                                     )

@@ -91,7 +91,7 @@ export default function DashboardComponent() {
             }
             setBmr((res).toFixed(2));
             const updateValueUser = await updateBmr.mutateAsync({
-                url: "/api/save-bmr",
+                url: "save-bmr",
                 body: { height, weight, age, activity: selectActivity, gender, bmr: (res).toFixed(2) }
             });
             if (updateValueUser.status === 500 || updateValueUser.status == 409 || updateValueUser.status === 404) {
@@ -123,7 +123,7 @@ export default function DashboardComponent() {
     const handleEsc = async () => {
         try {
             const res = await escape.mutateAsync({
-                url: "/api/cookies",
+                url: "cookies",
                 body: "",
             });
             if (res.status === 500) return;

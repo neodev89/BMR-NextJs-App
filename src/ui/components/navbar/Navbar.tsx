@@ -27,14 +27,14 @@ export const Navbar = () => {
 
     const token = useGet<{ email: string }>({
         key: ["disconnect-user"],
-        url: "/api/cookies",
+        url: "cookies",
     });
 
     const handleEsc = async () => {
         try {
             if (token.data) {
                 const res = await escapeUser.mutateAsync({
-                    url: "/api/cookies",
+                    url: "cookies",
                     body: {},
                 });
                 if (res.status === 200) {

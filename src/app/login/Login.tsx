@@ -73,7 +73,7 @@ export default function LoginComponent() {
     const handleSubmitFormApi: SubmitHandler<loginSchemaType> = async (data) => {
         try {
             const result = await login.mutateAsync({
-                url: "/api/login",
+                url: "login",
                 method: "POST",
                 body: data,
             });
@@ -105,7 +105,7 @@ export default function LoginComponent() {
     const handleSubmitRegister: SubmitHandler<loginSchemaType> = async (data) => {
         try {
             const result = await login.mutateAsync({
-                url: "/api/register",
+                url: "register",
                 body: data,
             });
 
@@ -129,7 +129,7 @@ export default function LoginComponent() {
         setLoadingApi(true);
         try {
             const result = await rigeneraToken.mutateAsync({
-                url: "/api/cookies",
+                url: "cookies",
                 method: "PUT",
                 body: user_name,
             });

@@ -59,7 +59,6 @@ export async function POST(req: Request) {
             .from(registeredApp)
             .where(eq(registeredApp.token, userToken))
             .limit(1);
-        console.log("Utente attivo: ", user[0]);
 
         if (user.length === 0) {
             const response: ApiResponse<null> = {
@@ -80,11 +79,7 @@ export async function POST(req: Request) {
             .from(userBmr)
             .where(eq(userBmr.token_user, user[0].token))
 
-        if (userValue.length === 0) {
-            lastID = 0;
-        }
-
-        lastID = userValue[userValue.length - 1].id;
+        lastID = userValue.length === 0 ? 1 : userValue[userValue.length - 1].id;
 
         const { token, user_name } = user[0];
 
@@ -94,7 +89,7 @@ export async function POST(req: Request) {
             user_name,
             ...parsedBody,
             token_user: token,
-            id: lastID + 1,
+            id: lastID === 1 ? lastID : lastID + 1,
         }
 
         await db
@@ -116,7 +111,7 @@ export async function POST(req: Request) {
     } catch (error: Error | unknown) {
         const response: ApiResponse<null> = {
             success: false,
-            message: error instanceof Error ? error.message : "Errore nella chiamata API",
+            message: error instanceof Error ? `Errore chiamata API ${error.message}` : String(error),
             data: null,
             status: 500,
         };
@@ -282,7 +277,7 @@ export async function GET() {
     } catch (error: Error | unknown) {
         const response: ApiResponse<unknown> = {
             success: false,
-            message: "Errore nella chiamata API",
+            message: error instanceof Error ? error.message : String(error),
             data: error instanceof Error ? error.message : error,
             status: 500,
         };

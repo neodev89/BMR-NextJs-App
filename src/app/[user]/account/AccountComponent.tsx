@@ -14,12 +14,12 @@ import { tokenApiResponse } from "@/src/@types/ApiResponse";
 
 
 const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
-   ssr: false
+    ssr: false
 });
 
 const formatDate = (date: string) => {
     if (!date) return "";
-    const splitDate = date.split("T");
+    const splitDate = date.split(" ");
     const newDate = splitDate[0];
     const newSplit = newDate.split("-");
     const y = newSplit[0];
@@ -39,15 +39,15 @@ export default function AccountComponent() {
     const slug = decodeURIComponent(rawSlug); // <-- FIX
     const goBack = `/${slug}/dashboard`;
 
-    const {data: token, isLoading: loadTk } = useGet<tokenApiResponse>({
+    const { data: token, isLoading: loadTk } = useGet<tokenApiResponse>({
         key: ["get-cookies"],
-        url: "/api/cookies"
+        url: "cookies"
     });
     console.log(token);
 
     const { data: bmrData, isLoading: loadingBmr } = useGet<userBmrDbType[]>({
         key: ["get-data-bmr-user"],
-        url: "/api/save-bmr",
+        url: "save-bmr",
         enabled: true,
         staleTime: 0,
         retry: 1,
@@ -61,7 +61,7 @@ export default function AccountComponent() {
     const handleDeleteRecord = async (order: number) => {
         try {
             const res = await deleteRecord.mutateAsync({
-                url: "/api/save-bmr",
+                url: "save-bmr",
                 body: order,
                 invalidateKeys: ["get-data-bmr-user", "get-statistic-for-user"]
             });
@@ -112,23 +112,25 @@ export default function AccountComponent() {
 
     const handleGeneratePdf = async () => {
         try {
-            if (statisticUserParsed.data) {
-                await generatePdf.mutateAsync({
-                    url: "stat-pdf",
-                    body: statisticUserParsed.data.data
-                }, {
-                    onSuccess: (blob) => {
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "statistiche_bmr.pdf";
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                    },
-                })
+            if (!statisticUserParsed?.data) {
+                console.log("I dati non sono ancora presenti");
+                return null;
             }
-            console.log("I dati non sono ancora presenti")
-            return null;
+
+            await generatePdf.mutateAsync({
+                url: "stat-pdf",
+                body: statisticUserParsed.data.data
+            }, {
+                onSuccess: (blob) => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "statistiche_bmr.pdf";
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                },
+            });
+
         } catch (error) {
             console.log("Errore nella chiamata API", error);
         }
@@ -254,13 +256,13 @@ export default function AccountComponent() {
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
                                                                                         <div className="grid col-1 row-1 w-full"><p>Email utente:</p></div>
                                                                                         <div className="grid col-2 row-1 h-auto w-full justify-end">
-                                                                                            <p>{statisticUserParsed.data.data.email}</p>
+                                                                                            <p className="overflow-x-auto">{statisticUserParsed.data.data.email}</p>
                                                                                         </div>
                                                                                     </div>
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
                                                                                         <div className="grid col-1 row-1 w-full"><p>Attività media:</p></div>
-                                                                                        <div className="grid col-2 row-1 h-auto w-full justify-end">
-                                                                                            <p>{statisticUserParsed.data.data.average_activity}</p>
+                                                                                        <div className="grid col-2 row-1 w-full justify-end">
+                                                                                            <p className="text-right">{statisticUserParsed.data.data.average_activity}</p>
                                                                                         </div>
                                                                                     </div>
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
@@ -313,7 +315,7 @@ export default function AccountComponent() {
                                                                                     </div>
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
                                                                                         <div className="grid col-1 row-1 w-full"><p>lista Età:</p></div>
-                                                                                        <div className="grid col-2 row-1 h-auto w-full justify-start">
+                                                                                        <div className="grid col-2 row-1 h-auto w-full justify-end">
                                                                                             <p>
                                                                                                 {
                                                                                                     statisticUserParsed.data.data.list_age.map((i, idx) => (
@@ -338,7 +340,7 @@ export default function AccountComponent() {
                                                                                     <div className="grid grid-cols-2 grid-rows-1 justify-between w-full h-auto">
                                                                                         <div className="grid col-1 row-1 w-full"><p>lista Attività:</p></div>
                                                                                         <div className="grid col-2 row-1 h-auto w-full justify-end">
-                                                                                            <p>
+                                                                                            <p className="text-right">
                                                                                                 {
                                                                                                     statisticUserParsed.data.data.list_activity.map((i, idx) => (
                                                                                                         <span key={idx}>{`${i} | `}</span>

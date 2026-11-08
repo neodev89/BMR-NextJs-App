@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-    url: `${process.env.NEXT_PUBLIC_API_URL}/api/`,
+    baseURL: `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8002'}/`,
     timeout: 30000,
     headers: {
         "Content-Type": "application/json",
@@ -9,6 +9,7 @@ const instance = axios.create({
     }
 });
 
+// Interceptor per le richieste
 instance.interceptors.request.use(
     (config) => {
         const token = typeof window !== "undefined"
@@ -16,35 +17,30 @@ instance.interceptors.request.use(
             : null;
 
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`
+            config.headers.Authorization = `Bearer ${token}`;
         }
 
         config.headers["x-request-id"] = crypto.randomUUID();
 
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
+// Interceptor per le risposte
 instance.interceptors.response.use(
-  (response) => {
-    // Normalizzazione opzionale
-    return response;
-  },
-  async (error) => {
-    const status = error.response?.status;
+    (response) => response,
+    async (error) => {
+        const status = error.response?.status;
 
-    // Logging errori
-    console.log("API Error:", {
-      url: error.config?.url,
-      status,
-      data: error.response?.data,
-    });
+        console.log("API Error:", {
+            url: error.config?.url,
+            status,
+            data: error.response?.data,
+        });
 
-    return Promise.reject(error);
-  }
+        return Promise.reject(error);
+    }
 );
 
 export default instance;
