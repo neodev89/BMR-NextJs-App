@@ -3,10 +3,11 @@
 import dynamic from "next/dynamic";
 import { tokenApiResponse } from "@/src/@types/ApiResponse";
 import { useGet, useGetParsedZod } from "@/src/tanstack/api/useGet";
-import { ColumnStatisticTypes, StatisticUserSchema } from "@/src/zod/StatisticUser";
+import { RowsStatisticTypes, StatisticUserSchema } from "@/src/zod/StatisticUser";
 import { useEffect, useState } from "react";
 import { downloadUserCsv } from "./callCSV";
 import { CircularProgress } from "@mui/material";
+import TableStat from "@/src/ui/components/tables/tableStat";
 
 
 const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
@@ -54,7 +55,7 @@ export default function TableComponent() {
         "Media Peso", "Media Altezza", "Media Età", "Media attività", "Media BMR", "Data Snapshot", "Totale salvataggi",
     ]
 
-    const [rowsStat, setRowsStat] = useState<ColumnStatisticTypes | null>(null);
+    const [rowsStat, setRowsStat] = useState<RowsStatisticTypes | null>(null);
     const [loadRows, setLoadRows] = useState<boolean>(false);
 
     useEffect(() => {
@@ -64,7 +65,7 @@ export default function TableComponent() {
                 if (!isSuccess) return;
                 if (statLoading) return;
                 if (!statisticUserData) return;
-                const newStatistic: ColumnStatisticTypes = {
+                const newStatistic: RowsStatisticTypes = {
                     email: statisticUserData.email,
                     name: statisticUserData.name,
                     list_weight: statisticUserData.list_weight,
@@ -106,91 +107,16 @@ export default function TableComponent() {
                         <button type="button" onClick={handleExportClick} className="h-12 w-32 cursor-pointer rounded-2xl border border-gray-100 text-white p-2">Importa CSV</button>
                     </div>
                     <div className="relative flex flex-row h-3/4 w-full">
-                        <table className="border-gray-300 border-collapse w-full">
-                            <thead>
-                                <tr>
-                                    {
-                                        nameColHead.length > 0 ? (
-                                            nameColHead.map((el, idx) => (
-                                                <th className="min-w-50 h-16 text-center px-2 border border-gray-100" key={idx}>
-                                                    {el}
-                                                </th>
-                                            ))
-                                        ) : (
-                                            <th>Nessun dato</th>
-                                        )
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    loadRows ? (
-                                        <div className="h-20 w-full flex p-5">
-                                            <CircularProgress size={'7rem'} sx={{
-                                                color: '#7f22fe'
-                                            }} />
-                                        </div>
-                                    ) : (
-                                        <tr className="text-center">
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.email : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.name : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.list_weight.map(el => {
-                                                    const replaced = String(el).replace(".", ",");
-                                                    return `${replaced} | `;
-                                                }) : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.list_height.map(el => {
-                                                    const replaced = String(el).replace(".", ",");
-                                                    return `${replaced} | `;
-                                                }) : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.list_age.map(el => `${el} | `) : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.list_activity.map(el => `${el} | `) : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.list_bmr.map(el => {
-                                                    const replaced = String(el).replace(".", ",");
-                                                    return `${replaced} | `;
-                                                }) : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? String(rowsStat.average_weight).replace(".", ",") : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.average_height : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.average_age : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.average_activity : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? rowsStat.average_bmr : ''}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? formattaIsoConSplit(rowsStat.creations_date) : '-'}
-                                            </td>
-                                            <td className="border border-gray-100">
-                                                {rowsStat ? (rowsStat.list_order.length === 1 ? 1 : rowsStat.list_order.reduce((a, b) => a + b)) : '0'}
-                                            </td>
-                                        </tr>
-                                    )
-                                }
-                            </tbody>
-                        </table>
+                        <TableStat
+                            nameColHead={nameColHead}
+                            rowsStat={rowsStat}
+                            loadRows={loadRows}
+                            formattaIsoConSplit={formattaIsoConSplit}
+                        />
                     </div>
                 </div>
             </div >
+
         </LazyGlobalWrapper >
     )
 }

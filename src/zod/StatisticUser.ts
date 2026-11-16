@@ -23,7 +23,7 @@ export const StatisticUserSchema = z.object({
     list_order: z.array(z.number()),
 });
 
-export const ColumnStatisticUser = z.object({
+export const RowsStatisticUser = z.object({
     email: z.string().nonempty(),
     name: z.string().nonempty(),
 
@@ -46,4 +46,4 @@ export const ColumnStatisticUser = z.object({
 });
 
 export type StatisticUserTypes = z.infer<typeof StatisticUserSchema>;
-export type ColumnStatisticTypes = z.infer<typeof ColumnStatisticUser>;
+export type RowsStatisticTypes = z.infer<typeof RowsStatisticUser>;
