@@ -11,6 +11,8 @@ import { useCustomDeleteMutation } from "@/src/tanstack/api/useDelete";
 import { StatisticUserSchema, StatisticUserTypes } from "@/src/zod/StatisticUser";
 import { usePostBlob } from "@/src/tanstack/api/usePostBlob";
 import { tokenApiResponse } from "@/src/@types/ApiResponse";
+import { usePostCM } from "@/src/tanstack/api/usePost";
+import { useState } from "react";
 
 
 const LazyGlobalWrapper = dynamic(() => import("@/src/ui/globalWrapper/GlobalWrapper"), {
@@ -38,6 +40,7 @@ export default function AccountComponent() {
     const rawSlug = pathname.split("/")[1];
     const slug = decodeURIComponent(rawSlug); // <-- FIX
     const goBack = `/${slug}/dashboard`;
+    const [loadingGeneratePDF, setLoadingGeneratePDF] = useState<boolean>(true);
 
     const { data: token, isLoading: loadTk } = useGet<tokenApiResponse>({
         key: ["get-cookies"],
@@ -52,6 +55,10 @@ export default function AccountComponent() {
         staleTime: 0,
         retry: 1,
         gcTime: 60 * 60 * 20,
+    });
+
+    const sendMail = usePostCM<StatisticUserTypes, null>({
+        mutationKey: ["send-user-statistic-mail"],
     });
 
     const deleteRecord = useCustomDeleteMutation<number, userBmrDbType[]>({
@@ -90,12 +97,26 @@ export default function AccountComponent() {
 
         staleTime: 0,
         retry: 4,
-        gcTime: 60 * 60 * 20,
+        gcTime: 1000 * 60 * 2,
         schema: StatisticUserSchema
     });
 
-    console.log("RAW PYTHON RESPONSE:", statisticUserParsed.data);
+    const handleSendMail = async () => {
+        try {
+            if (!statisticUserParsed || !statisticUserParsed.data || !statisticUserParsed.data.data) return null;
+            const res = await sendMail.mutateAsync({
+                url: `${apiUrlPy}/api/send-statistic-pdf`,
+                body: statisticUserParsed.data.data,
+            });
+            if (res.status !== 200) return null;
+            return res.res;
+        } catch (error: Error | unknown) {
+            console.log("Errore alla chiamata API: ", error instanceof Error ? error.message : String(error));
+        }
+    }
 
+    console.log("RAW PYTHON RESPONSE:", statisticUserParsed.data);
+    console.log("La response dell'API Send Mail è: ", sendMail.data?.res.message)
     console.log("La mail dell'utente è presente? ", emailUser ?? "No");
     console.log("Chissà se i dati Python sono stati chiamati: ", statisticUserParsed.data?.data); // output positivo
 
@@ -112,6 +133,7 @@ export default function AccountComponent() {
 
     const handleGeneratePdf = async () => {
         try {
+            setLoadingGeneratePDF(false);
             if (!statisticUserParsed?.data) {
                 console.log("I dati non sono ancora presenti");
                 return null;
@@ -128,11 +150,17 @@ export default function AccountComponent() {
                     a.download = "statistiche_bmr.pdf";
                     a.click();
                     window.URL.revokeObjectURL(url);
+                    setLoadingGeneratePDF(true);
                 },
+                onError: (error) => {
+                    console.log("Errore ", error);
+                    setLoadingGeneratePDF(true);
+                }
             });
 
         } catch (error) {
             console.log("Errore nella chiamata API", error);
+            setLoadingGeneratePDF(true);
         }
     };
 
@@ -140,9 +168,14 @@ export default function AccountComponent() {
         <LazyGlobalWrapper>
             <div className="dashboard">
                 <div className="relative flex flex-row justify-between px-2 h-auto w-full">
-                    <Link href={`${goBack}`} className="links links-hover">Back</Link>
+                    <Link href={`${goBack}`} className="links links-hover">Dashboard</Link>
                     {
-                        statisticUserParsed.data && <button type="button" onClick={handleGeneratePdf} className="links links-hover">Genera PDF</button>
+                        statisticUserParsed.data && (
+                            <div className="relative flex flex-row justify-evenly px-2 h-auto w-auto">
+                               {loadingGeneratePDF && <button type="button" onClick={handleGeneratePdf} className="links links-hover">Genera PDF</button>}
+                                <button type="button" onClick={handleSendMail} className="links links-hover">Invia email</button>
+                            </div>
+                        )
                     }
                 </div>
                 <div className="relative flex flex-row h-full w-full justify-evenly items-center">

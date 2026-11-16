@@ -81,6 +81,8 @@ body {
   --text-h1-lg: 4rem;
   
   --padding-links: 0.8rem;
+  --margin-links: 0.8rem;
+  --margin-right-links: 1rem;
 
   --height-image-home: 30rem;
 
@@ -258,6 +260,7 @@ body {
   flex flex-row
   justify-center items-center
   p-links
+  mr-links
   rounded-2xl
   bg-violet-600
   text-white
@@ -269,6 +272,7 @@ body {
   @apply hover:text-white 
   hover:bg-violet-900 
   hover:rounded-2xl
+  hover:mr-right-links
   hover:scale-110;
 }
 

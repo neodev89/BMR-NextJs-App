@@ -14,7 +14,7 @@ import { Path, useForm, useWatch } from "react-hook-form";
 import { useCustomDeleteMutation } from "@/src/tanstack/api/useDelete";
 import { useRouter } from "next/navigation";
 import { bmrSchema, bmrType, userBmrDbType } from "@/src/zod/userBmrSchema";
-import { useCustomMutation } from "@/src/tanstack/api/usePost";
+import { usePostCM } from "@/src/tanstack/api/usePost";
 
 
 export default function DashboardComponent() {
@@ -39,7 +39,9 @@ export default function DashboardComponent() {
     const router = useRouter();
 
     const escape = useCustomDeleteMutation<string, void>({ mutationKey: ["escape-delete-cookies"] });
-    const updateBmr = useCustomMutation<bmrType, userBmrDbType>(["save-user-bmr"]);
+    const updateBmr = usePostCM<bmrType, userBmrDbType>({
+        mutationKey: ["save-user-bmr"]
+    });
 
     const deleteItem = (name: Path<bmrType>) => {
         setValue(name, "");

@@ -1,28 +1,19 @@
 'use client'
 
-import { ApiResponse } from "@/src/@types/ApiResponse";
 import instance from "@/src/axios/instance";
-import { useMutation } from "@tanstack/react-query";
-import { Method } from "axios";
+import { ApiResponse } from "@/src/@types/ApiResponse";
+import { hookProps, MutationProps } from "@/src/@types/mutationType";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-interface mutationProps<T> {
-    url: string;
-    body: T;
-    pathSuccess?: string;
-    pathErrorCredential?: string;
-    pathError?: string;
-    method?: Method;
-    pathRegister?: string;
-    isRegister?: boolean;
-}
 
 export interface ResponseApiClient<K> {
     status: number;
     res: ApiResponse<K>
 }
 
-export function useCustomMutation<T, K>(mutationKey: string[]) {
-    const request = async ({ url, body }: mutationProps<T>) => {
+export function usePostCM<T, K>({ mutationKey, ...other }: hookProps) {
+    const queryClient = useQueryClient();
+    const request = async ({ url, body }: MutationProps<T>) => {
         const res = await instance.post(
             url,
             body,
@@ -30,16 +21,57 @@ export function useCustomMutation<T, K>(mutationKey: string[]) {
                 validateStatus: () => true,
             }
         );
-        const result: ResponseApiClient<K> = { 
-            status: res.status, 
+        const result: ResponseApiClient<K> = {
+            status: res.status,
             res: res.data
-        };
-        console.log("La struttura del client è: ", result);
+        } satisfies ResponseApiClient<K>;
+
         return result;
     };
 
-    return useMutation({
+    return useMutation<ResponseApiClient<K>, Error, MutationProps<T>>({
         mutationKey,
         mutationFn: request,
+
+        // 🔥 CONFIGURAZIONE AVANZATA
+        retry: other.retry || 1,
+        networkMode: other.networkMode || 'online',
+        gcTime: other.gcTime || 1000 * 60 * 5, // 5 minuti
+        meta: {
+            description: other.description || "Custom mutation with full control",
+        },
+
+        // 🔥 SUCCESS HANDLER
+        onSuccess: (data, variables) => {
+            console.log("Mutation success:", data);
+
+            // invalidazione query
+            if (variables.invalidateKeys) {
+                variables.invalidateKeys.forEach((key) => {
+                    queryClient.invalidateQueries({ queryKey: [key] });
+                });
+            }
+
+            // redirect success
+            if (variables.pathSuccess) {
+                window.location.href = variables.pathSuccess;
+            }
+        },
+
+        // 🔥 ERROR HANDLER
+        onError: (error, variables) => {
+            console.error("Mutation error:", error);
+
+            if (variables.pathErrorCredential) {
+                window.location.href = variables.pathErrorCredential;
+            } else if (variables.pathError) {
+                window.location.href = variables.pathError;
+            }
+        },
+
+        // 🔥 ALWAYS
+        onSettled: () => {
+            console.log("Mutation settled");
+        },
     });
 }

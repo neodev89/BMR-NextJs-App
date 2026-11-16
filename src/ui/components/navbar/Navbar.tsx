@@ -16,9 +16,9 @@ export const Navbar = () => {
     const splittedPathname = pathname.split("/");
     console.log("PATHNAME splittato: ", splittedPathname);
     // output: ["", "[user]", "route"]
-    const replaceAccountPath = pathname.replace(`${splittedPathname[2]}`, "/account");
-    const replacedYourData = pathname.replace(`${splittedPathname[2]}`, "/foods");
-    const replacedTableStatistic = pathname.replace(`${splittedPathname[2]}`, "/statistics");
+    const replaceStatisticsPath = pathname.replace(`${splittedPathname[2]}`, "statistics");
+    const replacedYourData = pathname.replace(`${splittedPathname[2]}`, "foods");
+    const replacedTableStatistic = pathname.replace(`${splittedPathname[2]}`, "table");
     console.log(replacedTableStatistic);
     
     const escapeUser = useCustomDeleteMutation({
@@ -73,8 +73,8 @@ export const Navbar = () => {
                 }
                 {hasDynamicUser && (
                     <>
-                        <Link href={`${replaceAccountPath}`} className="links links-hover">
-                            Account
+                        <Link href={`${replaceStatisticsPath}`} className="links links-hover">
+                            Statistiche
                         </Link>
                         <Link href={`${replacedYourData}`} className="links links-hover">
                             Pasti
